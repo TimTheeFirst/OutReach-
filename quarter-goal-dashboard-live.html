@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OutReach KPI — Quarter Goal</title>
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     ============================================================ */
+  :root {
+    --bg-0: #0b0d12;          /* deep space navy */
+    --bg-1: #11141c;
+    --card: rgba(255, 255, 255, 0.035);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f5f7fa;
+    --text-secondary: #8b93a7;
+    --text-tertiary: #565e70;
+    --track: rgba(255, 255, 255, 0.07);
+
+    /* status palettes (set dynamically via JS) */
+    --status: #f5a623;
+    --status-soft: rgba(245, 166, 35, 0.14);
+    --status-glow: rgba(245, 166, 35, 0.35);
+
+    --radius-lg: 32px;
+    --radius-pill: 999px;
+
+    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                  "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-0);
+    font-family: var(--font-stack);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* Ambient background — very subtle radial wash tinted by status color */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1200px 800px at 75% 15%, var(--status-soft), transparent 60%),
+      radial-gradient(900px 700px at 15% 90%, rgba(90, 120, 255, 0.05), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    transition: background 1.2s ease;
+    z-index: -1;
+  }
+
+  .stage {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4vh 5vw;
+  }
+
+  /* ============================================================
+     KPI CARD
+     ============================================================ */
+  .kpi-card {
+    width: min(1400px, 100%);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(24px);
+    box-shadow:
+      0 40px 80px -20px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    padding: clamp(48px, 5vw, 88px) clamp(56px, 6vw, 104px);
+    animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* --- header row ------------------------------------------- */
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: clamp(40px, 5vh, 64px);
+  }
+
+  .title-block .eyebrow {
+    font-size: clamp(14px, 1vw, 18px);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+
+  .title-block h1 {
+    font-size: clamp(40px, 3.4vw, 60px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .chip-row { display: flex; gap: 16px; align-items: center; }
+
+  .days-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    font-size: clamp(18px, 1.4vw, 26px);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .days-chip .q-label { color: var(--text-tertiary); font-weight: 500; }
+
+  .countdown { display: flex; align-items: baseline; gap: 14px; }
+  .countdown .seg { display: flex; align-items: baseline; gap: 4px; }
+  .countdown .seg b {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: clamp(20px, 1.6vw, 30px);
+    font-variant-numeric: tabular-nums;
+    min-width: 2ch;
+    text-align: right;
+  }
+  .countdown .seg span {
+    color: var(--text-tertiary);
+    font-size: clamp(13px, 1vw, 18px);
+    font-weight: 500;
+  }
+
+  .month-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    font-size: clamp(18px, 1.4vw, 26px);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .month-chip .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--status);
+    box-shadow: 0 0 12px var(--status-glow);
+    transition: background 0.8s ease, box-shadow 0.8s ease;
+  }
+
+  /* --- figures row ------------------------------------------- */
+  .figures {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 48px;
+    margin-bottom: clamp(36px, 4.5vh, 56px);
+  }
+
+  .amounts { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+
+  .amount-actual {
+    font-size: clamp(72px, 6.5vw, 120px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .amount-divider {
+    font-size: clamp(40px, 3vw, 56px);
+    font-weight: 300;
+    color: var(--text-tertiary);
+  }
+
+  .amount-target {
+    font-size: clamp(40px, 3vw, 56px);
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .amount-label {
+    font-size: clamp(15px, 1.1vw, 20px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-top: 16px;
+  }
+
+  .achievement {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .achievement .pct {
+    font-size: clamp(64px, 5.5vw, 104px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--status);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.8s ease;
+    text-shadow: 0 0 60px var(--status-glow);
+  }
+
+  .achievement .pct-label {
+    font-size: clamp(15px, 1.1vw, 20px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-top: 16px;
+  }
+
+  /* --- progress bar ------------------------------------------ */
+  .progress-track {
+    position: relative;
+    height: clamp(24px, 2.4vh, 34px);
+    background: var(--track);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--status) 70%, #ffffff 8%) 0%,
+      var(--status) 100%);
+    box-shadow: 0 0 32px var(--status-glow);
+    transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1),
+                background 0.8s ease,
+                box-shadow 0.8s ease;
+  }
+
+  /* moving sheen on the fill */
+  .progress-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg,
+      transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
+    background-size: 240px 100%;
+    background-repeat: no-repeat;
+    animation: sheen 3.5s ease-in-out infinite;
+  }
+
+  @keyframes sheen {
+    0%   { background-position: -240px 0; }
+    55%  { background-position: calc(100% + 240px) 0; }
+    100% { background-position: calc(100% + 240px) 0; }
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: clamp(15px, 1.1vw, 20px);
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-meta .remaining strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  /* value-change pulse (applied via JS when numbers update) */
+  .pulse { animation: pulse 0.7s ease; }
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  /* sync status chip */
+  .sync-chip {
+    position: fixed;
+    bottom: 20px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    z-index: 10;
+  }
+  .sync-chip .sync-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #565e70;
+  }
+  .sync-chip.ok .sync-dot { background: #30d158; box-shadow: 0 0 8px rgba(48,209,88,0.5); }
+  .sync-chip.err .sync-dot { background: #ff453a; box-shadow: 0 0 8px rgba(255,69,58,0.5); }
+  .sync-chip.err { color: #ff8a80; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="kpi-card">
+
+    <div class="card-header">
+      <div class="title-block">
+                <div class="eyebrow">OutReach KPI</div>
+        <h1>Quarter Goal</h1>
+      </div>
+      <div class="chip-row">
+        <div class="days-chip">
+          <span class="countdown">
+            <span class="seg"><b id="cd-days">—</b><span>d</span></span>
+            <span class="seg"><b id="cd-hours">—</b><span>h</span></span>
+            <span class="seg"><b id="cd-mins">—</b><span>m</span></span>
+            <span class="seg"><b id="cd-secs">—</b><span>s</span></span>
+          </span>
+          <span class="q-label" id="quarter-label"></span>
+        </div>
+        <div class="month-chip">
+          <span class="dot"></span>
+          <span id="month-label">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="figures">
+      <div>
+        <div class="amounts">
+          <span class="amount-actual" id="actual-value">SAR 0</span>
+          <span class="amount-divider">/</span>
+          <span class="amount-target" id="target-value">SAR 0</span>
+        </div>
+        <div class="amount-label">Quarter achieved · Quarter target</div>
+      </div>
+
+      <div class="achievement">
+        <div class="pct" id="pct-value">0%</div>
+        <div class="pct-label">Achievement</div>
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-meta">
+      <span>0%</span>
+      <span class="remaining" id="remaining-label"></span>
+      <span>100%</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="sync-chip" id="sync-chip" style="display:none;">
+  <span class="sync-dot"></span>
+  <span id="sync-text">Connecting…</span>
+</div>
+
+<script>
+/* ==============================================================
+   CONFIGURATION
+   --------------------------------------------------------------
+   OPTION A — Remote values (recommended):
+   Paste your published Google Sheet CSV link into SHEET_URL.
+   The sheet needs 3 columns with a header row:  month, actual, target
+   The dashboard polls it every 30 seconds and updates automatically.
+
+   OPTION B — Manual values:
+   Leave SHEET_URL empty ("") and edit the three fallback values below.
+   ============================================================== */
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfxJp-bPlcetEh63C-5lMvUpXvWVvqbcMhOtlh1A9VwVTHIOMmhtyfzMDy6c-xFSTLWJjKQvlM2Th/pub?output=csv";
+const SHEET_ID = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";  // from the sheet's normal link (…/d/THIS_PART/edit)
+const QUARTER_END = "";        // optional override, e.g. "2026-09-30". Empty = auto calendar quarter.
+const POLL_SECONDS = 30;
+
+let month  = "July";           // fallback / manual values
+let actual = 3853105;
+let target = 700000000;
+/* ============================================================== */
+
+/* ---- helpers ---- */
+function formatSAR(value) {
+  if (value >= 1e9) return "SAR " + trimZero(value / 1e9) + "B";
+  if (value >= 1e6) return "SAR " + trimZero(value / 1e6) + "M";
+  if (value >= 1e3) return "SAR " + trimZero(value / 1e3) + "K";
+  return "SAR " + value.toLocaleString("en-US");
+}
+function trimZero(n) {
+  return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, "");
+}
+
+/* Status color by achievement %:
+   green ≥ 70 · amber 40–70 · red < 40 (spec: red below 30) */
+function statusColors(pct) {
+  if (pct >= 70) return { c: "#30d158", soft: "rgba(48,209,88,0.14)",  glow: "rgba(48,209,88,0.35)"  };
+  if (pct >= 40) return { c: "#f5a623", soft: "rgba(245,166,35,0.14)", glow: "rgba(245,166,35,0.35)" };
+  return           { c: "#ff453a", soft: "rgba(255,69,58,0.14)",  glow: "rgba(255,69,58,0.35)"  };
+}
+
+/* animated count-up */
+function animateNumber(el, from, to, duration, formatter) {
+  const start = performance.now();
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) { el.textContent = formatter(to); return; }
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 4); // easeOutQuart
+    el.textContent = formatter(from + (to - from) * eased);
+    if (t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---- render ---- */
+function render() {
+  const pct = target > 0 ? (actual / target) * 100 : 0;
+  const pctClamped = Math.max(0, Math.min(pct, 100));
+  const colors = statusColors(pct);
+
+  // theme
+  const root = document.documentElement.style;
+  root.setProperty("--status", colors.c);
+  root.setProperty("--status-soft", colors.soft);
+  root.setProperty("--status-glow", colors.glow);
+
+  // month
+  document.getElementById("month-label").textContent = month;
+
+  // numbers (count-up)
+  const actualEl = document.getElementById("actual-value");
+  const targetEl = document.getElementById("target-value");
+  const pctEl    = document.getElementById("pct-value");
+
+  animateNumber(actualEl, 0, actual, 1600, formatSAR);
+  targetEl.textContent = formatSAR(target);
+  animateNumber(pctEl, 0, pct, 1600, v => trimZeroPct(v) + "%");
+
+  // pulse on change
+  [actualEl, pctEl].forEach(el => {
+    el.classList.remove("pulse");
+    void el.offsetWidth; // restart animation
+    el.classList.add("pulse");
+  });
+
+  // progress bar
+  requestAnimationFrame(() => {
+    document.getElementById("progress-fill").style.width = pctClamped + "%";
+  });
+
+  // remaining
+  const remaining = Math.max(target - actual, 0);
+  document.getElementById("remaining-label").innerHTML =
+    remaining > 0
+      ? "<strong>" + formatSAR(remaining) + "</strong>&nbsp;to goal"
+      : "<strong>Goal reached</strong>";
+
+  document.title = "Quarter Goal — " + trimZeroPct(pct) + "%";
+  updateDaysLeft();
+}
+
+/* ---- days remaining in the quarter ---- */
+function quarterEndDate(now) {
+  if (QUARTER_END) {
+    const d = new Date(QUARTER_END + "T23:59:59");
+    if (!isNaN(d)) return d;
+  }
+  const q = Math.floor(now.getMonth() / 3);            // 0..3
+  const endMonth = q * 3 + 2;                          // 2, 5, 8, 11
+  return new Date(now.getFullYear(), endMonth + 1, 0, 23, 59, 59); // last day of quarter
+}
+
+const pad2 = n => String(n).padStart(2, "0");
+
+function updateDaysLeft() {
+  const now = new Date();
+  const end = quarterEndDate(now);
+  let ms = Math.max(0, end - now);
+
+  const days  = Math.floor(ms / 86400000);  ms -= days  * 86400000;
+  const hours = Math.floor(ms / 3600000);   ms -= hours * 3600000;
+  const mins  = Math.floor(ms / 60000);     ms -= mins  * 60000;
+  const secs  = Math.floor(ms / 1000);
+
+  document.getElementById("cd-days").textContent  = days;
+  document.getElementById("cd-hours").textContent = pad2(hours);
+  document.getElementById("cd-mins").textContent  = pad2(mins);
+  document.getElementById("cd-secs").textContent  = pad2(secs);
+
+  const q = Math.floor(end.getMonth() / 3) + 1;
+  document.getElementById("quarter-label").textContent = "· Q" + q + " ends " +
+    end.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+setInterval(updateDaysLeft, 1000); // live tick, rolls to next quarter automatically
+
+function trimZeroPct(v) {
+  return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
+}
+
+/* ---- remote sync (Google Sheet) ----
+   Accepts EITHER:
+   - a "Publish to web" CSV link (…pub?output=csv), or
+   - a normal sheet link (…/spreadsheets/d/SHEET_ID/edit…)
+     -> requires Share: "Anyone with the link" = Viewer
+*/
+function resolveSheetUrl(url) {
+  if (!url) return "";
+  if (url.includes("output=csv") || url.includes("tqx=out:csv")) return url;
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (m) return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv";
+  return url;
+}
+
+const RESOLVED_URL = resolveSheetUrl(SHEET_URL);
+let lastSnapshot = "";
+let lastSyncTime = null;
+
+function setStatus(state, text) {
+  const chip = document.getElementById("sync-chip");
+  if (!RESOLVED_URL && !SHEET_ID) { chip.style.display = "none"; return; }
+  chip.style.display = "flex";
+  chip.className = "sync-chip " + state;
+  document.getElementById("sync-text").textContent = text;
+}
+
+function parseCsvLine(line) {
+  // handles simple quoted values
+  const out = []; let cur = ""; let inQ = false;
+  for (const ch of line) {
+    if (ch === '"') inQ = !inQ;
+    else if (ch === "," && !inQ) { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(v => v.trim());
+}
+
+function applyValues(newMonth, newActual, newTarget, sourceLabel) {
+  if (isNaN(newActual) || isNaN(newTarget) || newTarget <= 0) {
+    setStatus("err", "Values in row 2 are not valid numbers");
+    return;
+  }
+  lastSyncTime = new Date();
+  setStatus("ok", "Live · synced " + lastSyncTime.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}));
+
+  const snapshot = newMonth + "|" + newActual + "|" + newTarget;
+  if (snapshot === lastSnapshot) return;
+  lastSnapshot = snapshot;
+
+  month = newMonth || month; actual = newActual; target = newTarget;
+  render();
+}
+
+function cleanNumber(v) {
+  return parseFloat(String(v).replace(/[^0-9.]/g, ""));
+}
+
+/* Method 1 — direct fetch of the published CSV */
+async function fetchCsv() {
+  const res = await fetch(RESOLVED_URL + (RESOLVED_URL.includes("?") ? "&" : "?") + "cb=" + Date.now());
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const text = await res.text();
+  if (text.trim().startsWith("<")) throw new Error("not csv");
+
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) { setStatus("err", "Sheet has no data row — add values in row 2"); return true; }
+
+  const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+  const values  = parseCsvLine(lines[1]);
+  const row = {};
+  headers.forEach((h, i) => row[h] = values[i]);
+
+  if (!("actual" in row) || !("target" in row)) {
+    setStatus("err", "Headers must be: month, actual, target (row 1)");
+    return true;
+  }
+  applyValues(row.month, cleanNumber(row.actual), cleanNumber(row.target), "csv");
+  return true;
+}
+
+/* Method 2 — JSONP via Google Visualization API (bypasses CORS / file:// limits).
+   Requires the sheet's Share setting: "Anyone with the link" = Viewer. */
+function fetchJsonp() {
+  return new Promise((resolve, reject) => {
+    if (!SHEET_ID) { reject(new Error("no sheet id")); return; }
+    const cbName = "gvizCb_" + Date.now();
+    const script = document.createElement("script");
+    const timer = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 10000);
+    function cleanup() { clearTimeout(timer); delete window[cbName]; script.remove(); }
+
+    window[cbName] = (data) => {
+      cleanup();
+      try {
+        const cols = data.table.cols.map(c => (c.label || "").toLowerCase().trim());
+        const cells = data.table.rows[0].c;
+        const row = {};
+        cols.forEach((h, i) => row[h] = cells[i] ? cells[i].v : null);
+        if (!("actual" in row) || !("target" in row)) {
+          setStatus("err", "Headers must be: month, actual, target (row 1)");
+          resolve(true); return;
+        }
+        applyValues(String(row.month ?? ""), cleanNumber(row.actual), cleanNumber(row.target), "jsonp");
+        resolve(true);
+      } catch (e) { reject(e); }
+    };
+
+    script.onerror = () => { cleanup(); reject(new Error("script load failed")); };
+    script.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
+                 "/gviz/tq?tqx=out:json;responseHandler:" + cbName + "&headers=1&cb=" + Date.now();
+    document.head.appendChild(script);
+  });
+}
+
+async function fetchRemote() {
+  if (!RESOLVED_URL && !SHEET_ID) return;
+  try {
+    if (RESOLVED_URL) { await fetchCsv(); return; }
+    throw new Error("no csv url");
+  } catch (e1) {
+    try {
+      await fetchJsonp();
+    } catch (e2) {
+      setStatus("err", "Can't reach the sheet — check internet, and set Share to 'Anyone with the link' (Viewer)");
+      console.warn("CSV failed:", e1, "JSONP failed:", e2);
+    }
+  }
+}
+
+render();
+setStatus("", "Connecting…");
+fetchRemote();
+if (RESOLVED_URL || SHEET_ID) setInterval(fetchRemote, POLL_SECONDS * 1000);
+</script>
+
+</body>
+</html>
