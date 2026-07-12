@@ -293,6 +293,25 @@
     100% { transform: scale(1); }
   }
 
+  /* percent label on the bar */
+  .bar-pct {
+    position: absolute;
+    top: 50%;
+    transform: translate(-110%, -50%);
+    font-size: clamp(13px, 1vw, 18px);
+    font-weight: 700;
+    color: #0b0d12;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .bar-pct.outside {
+    transform: translate(12px, -50%);
+    color: var(--status);
+  }
+
   /* secondary stat cards */
   .stat-row {
     display: flex;
@@ -401,6 +420,7 @@
 
     <div class="progress-track">
       <div class="progress-fill" id="progress-fill"></div>
+      <span class="bar-pct" id="bar-pct">0%</span>
     </div>
     <div class="progress-meta">
       <span>0%</span>
@@ -416,6 +436,13 @@
       <div class="stat-card">
         <div class="stat-label">Last Week Finance</div>
         <div class="stat-value" id="stat-week">—</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">This Week Finance</div>
+        <div class="stat-value" id="stat-thisweek">—</div>
       </div>
     </div>
 
@@ -446,6 +473,7 @@ const POLL_SECONDS = 30;
 
 let last24h  = null;           // optional: from sheet column 'last24h'
 let lastweek = null;           // optional: from sheet column 'lastweek'
+let thisweek = null;           // optional: from sheet column 'thisweek'
 let month  = "July";           // fallback / manual values
 let actual = 3853105;
 let target = 700000000;
@@ -515,9 +543,13 @@ function render() {
     el.classList.add("pulse");
   });
 
-  // progress bar
+  // progress bar + small percent label riding the fill edge
   requestAnimationFrame(() => {
     document.getElementById("progress-fill").style.width = pctClamped + "%";
+    const barPct = document.getElementById("bar-pct");
+    barPct.textContent = trimZeroPct(pct) + "%";
+    barPct.style.left = pctClamped + "%";
+    barPct.classList.toggle("outside", pctClamped < 12);
   });
 
   // remaining
@@ -531,6 +563,8 @@ function render() {
     (last24h  !== null && !isNaN(last24h))  ? formatSAR(last24h)  : "—";
   document.getElementById("stat-week").textContent =
     (lastweek !== null && !isNaN(lastweek)) ? formatSAR(lastweek) : "—";
+  document.getElementById("stat-thisweek").textContent =
+    (thisweek !== null && !isNaN(thisweek)) ? formatSAR(thisweek) : "—";
 
   document.title = "Quarter Goal — " + trimZeroPct(pct) + "%";
   updateDaysLeft();
@@ -621,15 +655,16 @@ function applyValues(newMonth, newActual, newTarget, extras) {
   lastSyncTime = new Date();
   setStatus("ok", "Live · synced " + lastSyncTime.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}));
 
-  const new24h  = extras && !isNaN(extras.last24h)  ? extras.last24h  : null;
-  const newWeek = extras && !isNaN(extras.lastweek) ? extras.lastweek : null;
+  const new24h    = extras && !isNaN(extras.last24h)  ? extras.last24h  : null;
+  const newWeek   = extras && !isNaN(extras.lastweek) ? extras.lastweek : null;
+  const newThis   = extras && !isNaN(extras.thisweek) ? extras.thisweek : null;
 
-  const snapshot = [newMonth, newActual, newTarget, new24h, newWeek].join("|");
+  const snapshot = [newMonth, newActual, newTarget, new24h, newWeek, newThis].join("|");
   if (snapshot === lastSnapshot) return;
   lastSnapshot = snapshot;
 
   month = newMonth || month; actual = newActual; target = newTarget;
-  last24h = new24h; lastweek = newWeek;
+  last24h = new24h; lastweek = newWeek; thisweek = newThis;
   render();
 }
 
@@ -658,7 +693,8 @@ async function fetchCsv() {
   }
   applyValues(row.month, cleanNumber(row.actual), cleanNumber(row.target), {
     last24h:  cleanNumber(row.last24h),
-    lastweek: cleanNumber(row.lastweek)
+    lastweek: cleanNumber(row.lastweek),
+    thisweek: cleanNumber(row.thisweek)
   });
   return true;
 }
@@ -686,7 +722,8 @@ function fetchJsonp() {
         }
         applyValues(String(row.month ?? ""), cleanNumber(row.actual), cleanNumber(row.target), {
           last24h:  cleanNumber(row.last24h),
-          lastweek: cleanNumber(row.lastweek)
+          lastweek: cleanNumber(row.lastweek),
+          thisweek: cleanNumber(row.thisweek)
         });
         resolve(true);
       } catch (e) { reject(e); }
