@@ -3,450 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OutReach KPI — Quarter Goal</title>
+<title>Financing Solutions Department</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
-     DESIGN TOKENS
+     Manafa brand · portrait TV (1080×1920 / rotated 1920×1080)
      ============================================================ */
   :root {
-    --bg-0: #0b0d12;          /* deep space navy */
-    --bg-1: #11141c;
-    --card: rgba(255, 255, 255, 0.035);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --text-primary: #f5f7fa;
-    --text-secondary: #8b93a7;
-    --text-tertiary: #565e70;
-    --track: rgba(255, 255, 255, 0.07);
-
-    /* status palettes (set dynamically via JS) */
-    --status: #f5a623;
-    --status-soft: rgba(245, 166, 35, 0.14);
-    --status-glow: rgba(245, 166, 35, 0.35);
-
-    --radius-lg: 32px;
-    --radius-pill: 999px;
-
-    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-                  "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg-top: #4a56dd;
+    --bg-mid: #3a41c4;
+    --bg-low: #35309f;
+    --text: #ffffff;
+    --text-soft: #d9defc;
+    --text-dim: #b7bdf0;
+    --glowline: #eef2ff;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
     height: 100%;
-    background: var(--bg-0);
-    font-family: var(--font-stack);
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
+    font-family: "Cairo", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--text);
     overflow: hidden;
+    background: var(--bg-mid);
   }
 
-  /* Ambient background — very subtle radial wash tinted by status color */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(1200px 800px at 75% 15%, var(--status-soft), transparent 60%),
-      radial-gradient(900px 700px at 15% 90%, rgba(90, 120, 255, 0.05), transparent 60%),
-      linear-gradient(180deg, var(--bg-1), var(--bg-0));
-    transition: background 1.2s ease;
-    z-index: -1;
+      radial-gradient(90% 55% at 50% -12%, rgba(199, 226, 255, 0.25), transparent 60%),
+      radial-gradient(120% 70% at 85% 108%, rgba(145, 57, 255, 0.35), transparent 60%),
+      linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-low) 100%);
+    z-index: -2;
   }
 
-  .stage {
+  /* faint brand arcs, bottom-left */
+  .brand-arcs {
+    position: fixed;
+    bottom: -12vh;
+    left: -14vw;
+    width: 70vw;
+    max-width: 720px;
+    opacity: 0.14;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .poster {
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 5.5vh 6vw 3.5vh;
+  }
+
+  /* --- header --- */
+  .kpi-tag {
+    font-size: clamp(22px, 2.6vh, 40px);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+  }
+  .kpi-tag-ar {
+    font-size: clamp(22px, 2.7vh, 42px);
+    font-weight: 700;
+    color: var(--text-soft);
+    margin-top: 0.2vh;
+  }
+  .countdown-line {
+    margin-top: 1.4vh;
+    font-size: clamp(14px, 1.5vh, 22px);
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- headline --- */
+  .headline {
+    margin-top: 4.5vh;
+    font-size: clamp(34px, 4.6vh, 68px);
+    font-weight: 800;
+    line-height: 1.15;
+    max-width: 22ch;
+    text-shadow: 0 2px 24px rgba(20, 24, 90, 0.35);
+  }
+
+  /* --- big figure --- */
+  .figure {
+    margin-top: 4.5vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4vh 5vw;
+    gap: 1.6vh;
   }
-
-  /* ============================================================
-     KPI CARD
-     ============================================================ */
-  .kpi-card {
-    width: min(1400px, 100%);
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    backdrop-filter: blur(24px);
-    box-shadow:
-      0 40px 80px -20px rgba(0, 0, 0, 0.55),
-      0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-    padding: clamp(48px, 5vw, 88px) clamp(56px, 6vw, 104px);
-    animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(24px) scale(0.985); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* --- header row ------------------------------------------- */
-  .card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: clamp(40px, 5vh, 64px);
-  }
-
-  .title-block .eyebrow {
-    font-size: clamp(14px, 1vw, 18px);
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: 12px;
-  }
-
-  .title-block h1 {
-    font-size: clamp(40px, 3.4vw, 60px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .chip-row { display: flex; gap: 16px; align-items: center; }
-
-  .days-chip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 28px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    font-size: clamp(18px, 1.4vw, 26px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  .days-chip .q-label { color: var(--text-tertiary); font-weight: 500; }
-
-  .countdown { display: flex; align-items: baseline; gap: 14px; }
-  .countdown .seg { display: flex; align-items: baseline; gap: 4px; }
-  .countdown .seg b {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: clamp(20px, 1.6vw, 30px);
-    font-variant-numeric: tabular-nums;
-    min-width: 2ch;
-    text-align: right;
-  }
-  .countdown .seg span {
-    color: var(--text-tertiary);
-    font-size: clamp(13px, 1vw, 18px);
-    font-weight: 500;
-  }
-
-  .month-chip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 28px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    font-size: clamp(18px, 1.4vw, 26px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
-
-  .month-chip .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--status);
-    box-shadow: 0 0 12px var(--status-glow);
-    transition: background 0.8s ease, box-shadow 0.8s ease;
-  }
-
-  /* --- figures row ------------------------------------------- */
-  .figures {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 48px;
-    margin-bottom: clamp(36px, 4.5vh, 56px);
-  }
-
-  .amounts { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
-
-  .amount-actual {
-    font-size: clamp(72px, 6.5vw, 120px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
+  .figure .riyal { height: clamp(40px, 5.2vh, 78px); width: auto; opacity: 0.95; }
+  .figure .num {
+    font-size: clamp(64px, 8.8vh, 132px);
+    font-weight: 900;
     line-height: 1;
+    letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #ffffff 55%, #c3cbff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 30px rgba(255, 255, 255, 0.25));
+  }
+  .figure-label {
+    margin-top: 1vh;
+    font-size: clamp(24px, 3vh, 44px);
+    font-weight: 700;
+    color: var(--text-soft);
   }
 
-  .amount-divider {
-    font-size: clamp(40px, 3vw, 56px);
-    font-weight: 300;
-    color: var(--text-tertiary);
-  }
-
-  .amount-target {
-    font-size: clamp(40px, 3vw, 56px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .amount-label {
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: 16px;
-  }
-
-  .achievement {
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .achievement .pct {
-    font-size: clamp(64px, 5.5vw, 104px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    color: var(--status);
-    font-variant-numeric: tabular-nums;
-    transition: color 0.8s ease;
-    text-shadow: 0 0 60px var(--status-glow);
-  }
-
-  .achievement .pct-label {
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: 16px;
-  }
-
-  /* --- progress bar ------------------------------------------ */
-  .progress-track {
-    position: relative;
-    height: clamp(24px, 2.4vh, 34px);
-    background: var(--track);
-    border-radius: var(--radius-pill);
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 0%;
-    border-radius: var(--radius-pill);
-    background: linear-gradient(90deg,
-      color-mix(in srgb, var(--status) 70%, #ffffff 8%) 0%,
-      var(--status) 100%);
-    box-shadow: 0 0 32px var(--status-glow);
-    transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1),
-                background 0.8s ease,
-                box-shadow 0.8s ease;
-  }
-
-  /* moving sheen on the fill */
-  .progress-fill::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg,
-      transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
-    background-size: 240px 100%;
-    background-repeat: no-repeat;
-    animation: sheen 3.5s ease-in-out infinite;
-  }
-
-  @keyframes sheen {
-    0%   { background-position: -240px 0; }
-    55%  { background-position: calc(100% + 240px) 0; }
-    100% { background-position: calc(100% + 240px) 0; }
-  }
-
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 500;
-    color: var(--text-tertiary);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .progress-meta .remaining strong {
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
-
-  /* value-change pulse (applied via JS when numbers update) */
-  .pulse { animation: pulse 0.7s ease; }
+  .pulse { animation: pulse 0.8s ease; }
   @keyframes pulse {
-    0%   { transform: scale(1); }
-    35%  { transform: scale(1.03); }
-    100% { transform: scale(1); }
+    0% { transform: scale(1); } 35% { transform: scale(1.04); } 100% { transform: scale(1); }
   }
 
-  /* percent label on the bar */
-  .bar-pct {
-    position: absolute;
-    top: 50%;
-    transform: translate(-110%, -50%);
-    font-size: clamp(13px, 1vw, 18px);
-    font-weight: 700;
-    color: #0b0d12;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s ease;
-    pointer-events: none;
-    z-index: 2;
-  }
-  .bar-pct.outside {
-    transform: translate(12px, -50%);
-    color: var(--status);
-  }
-
-  /* secondary stat cards */
-  .stat-row {
-    display: flex;
-    gap: clamp(20px, 2vw, 32px);
-    margin-top: clamp(32px, 4vh, 48px);
-  }
-  .stat-card {
+  /* --- journey --- */
+  .journey {
+    position: relative;
+    width: 100%;
     flex: 1;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: clamp(24px, 2.6vh, 36px) clamp(28px, 2.4vw, 40px);
+    min-height: 30vh;
+    margin-top: 1vh;
   }
-  .stat-card .stat-label {
-    font-size: clamp(14px, 1vw, 19px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: 14px;
-  }
-  .stat-card .stat-value {
-    font-size: clamp(34px, 2.8vw, 52px);
+  .journey svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+  .path-label {
+    font-family: "Cairo", sans-serif;
     font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
+    fill: #ffffff;
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+  }
+  .path-label.dim { fill: var(--text-soft); font-weight: 700; }
+
+  /* --- footer --- */
+  .motivation {
+    font-size: clamp(22px, 2.7vh, 40px);
+    font-weight: 800;
+  }
+  .motivation-ar {
+    font-size: clamp(22px, 2.8vh, 42px);
+    font-weight: 700;
+    color: var(--text-soft);
+    margin-top: 0.4vh;
+  }
+  .dept {
+    margin-top: 3.2vh;
+    line-height: 1.5;
+  }
+  .dept .ar {
+    font-size: clamp(16px, 1.9vh, 28px);
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+  .dept .en {
+    font-size: clamp(14px, 1.7vh, 25px);
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
   }
 
-  /* sync status chip */
+  /* sync chip — small and quiet */
   .sync-chip {
     position: fixed;
-    bottom: 20px;
-    right: 24px;
+    bottom: 14px;
+    right: 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
+    gap: 8px;
+    padding: 7px 14px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--card-border);
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-tertiary);
+    background: rgba(10, 12, 60, 0.28);
+    border: 1px solid rgba(255,255,255,0.14);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
     z-index: 10;
   }
-  .sync-chip .sync-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #565e70;
-  }
-  .sync-chip.ok .sync-dot { background: #30d158; box-shadow: 0 0 8px rgba(48,209,88,0.5); }
-  .sync-chip.err .sync-dot { background: #ff453a; box-shadow: 0 0 8px rgba(255,69,58,0.5); }
-  .sync-chip.err { color: #ff8a80; }
+  .sync-chip .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #b7bdf0; }
+  .sync-chip.ok .sync-dot { background: #30d158; box-shadow: 0 0 8px rgba(48,209,88,0.6); }
+  .sync-chip.err .sync-dot { background: #ff6a5e; box-shadow: 0 0 8px rgba(255,106,94,0.6); }
+  .sync-chip.err { color: #ffd2cd; }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation: none !important;
-      transition: none !important;
-    }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
 
-<div class="stage">
-  <div class="kpi-card">
+<svg class="brand-arcs" viewBox="0 0 720 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#ffffff" stroke-width="2">
+    <circle cx="330" cy="330" r="190"/>
+    <circle cx="430" cy="260" r="150"/>
+    <path d="M180 470 L 470 180"/>
+  </g>
+</svg>
 
-    <div class="card-header">
-      <div class="title-block">
-                <div class="eyebrow">OutReach KPI</div>
-        <h1>Quarter Goal</h1>
-      </div>
-      <div class="chip-row">
-        <div class="days-chip">
-          <span class="countdown">
-            <span class="seg"><b id="cd-days">—</b><span>d</span></span>
-            <span class="seg"><b id="cd-hours">—</b><span>h</span></span>
-            <span class="seg"><b id="cd-mins">—</b><span>m</span></span>
-            <span class="seg"><b id="cd-secs">—</b><span>s</span></span>
-          </span>
-          <span class="q-label" id="quarter-label"></span>
-        </div>
-        <div class="month-chip">
-          <span class="dot"></span>
-          <span id="month-label">—</span>
-        </div>
-      </div>
-    </div>
+<!-- Saudi Riyal symbol (simplified official mark) -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="riyal-sign" viewBox="0 0 100 100">
+    <g stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none">
+      <path d="M38 12 V 58 Q38 76 20 82"/>
+      <path d="M58 6 V 68"/>
+      <path d="M14 52 L 88 38"/>
+      <path d="M14 70 L 88 56"/>
+    </g>
+  </symbol>
+</svg>
 
-    <div class="figures">
-      <div>
-        <div class="amounts">
-          <span class="amount-actual" id="actual-value">SAR 0</span>
-          <span class="amount-divider">/</span>
-          <span class="amount-target" id="target-value">SAR 0</span>
-        </div>
-        <div class="amount-label">Quarter achieved · Quarter target</div>
-      </div>
+<div class="poster">
 
-      <div class="achievement">
-        <div class="pct" id="pct-value">0%</div>
-        <div class="pct-label">Achievement</div>
-      </div>
-    </div>
-
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-      <span class="bar-pct" id="bar-pct">0%</span>
-    </div>
-    <div class="progress-meta">
-      <span>0%</span>
-      <span class="remaining" id="remaining-label"></span>
-      <span>100%</span>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-label">Last 24H Finance</div>
-        <div class="stat-value" id="stat-24h">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Last Week Finance</div>
-        <div class="stat-value" id="stat-week">—</div>
-      </div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="stat-label">This Week Finance</div>
-        <div class="stat-value" id="stat-thisweek">—</div>
-      </div>
-    </div>
-
+  <div>
+    <div class="kpi-tag" id="q-tag">Q3 KPI</div>
+    <div class="kpi-tag-ar" id="q-tag-ar">هدف الربع الثالث</div>
+    <div class="countdown-line" id="countdown-line">— left in Q3</div>
   </div>
+
+  <div class="headline" id="headline">We're Off to a Great Start!</div>
+
+  <div>
+    <div class="figure">
+      <svg class="riyal" style="color:#dfe5ff" viewBox="0 0 100 100" width="70" height="70"><use href="#riyal-sign"/></svg>
+      <span class="num" id="actual-value">0</span>
+    </div>
+    <div class="figure-label">Financing Achieved</div>
+  </div>
+
+  <div class="journey">
+    <svg viewBox="0 0 1000 680" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="10" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-soft" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="18" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="target-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- journey path -->
+      <path id="journey-path"
+        d="M -40 640 C 200 560, 260 470, 420 420 S 700 330, 810 170"
+        stroke="var(--glowline)" stroke-width="10" stroke-linecap="round"
+        fill="none" filter="url(#glow)"/>
+
+      <!-- target (bullseye + arrow) at path end -->
+      <g id="target-group" transform="translate(810,170)">
+        <circle r="86" fill="url(#target-glow)"/>
+        <circle r="52" fill="#1c1f66" stroke="#ffffff" stroke-width="6"/>
+        <circle r="34" fill="#ffffff"/>
+        <circle r="20" fill="#1c1f66"/>
+        <circle r="8"  fill="#ffffff"/>
+        <g stroke="#ffffff" stroke-width="7" stroke-linecap="round">
+          <line x1="0" y1="0" x2="52" y2="-52"/>
+          <path d="M52 -52 L30 -50 M52 -52 L50 -30" fill="none"/>
+        </g>
+      </g>
+      <text id="target-label" class="path-label dim" font-size="34" text-anchor="middle" x="810" y="292">
+        <tspan id="target-text">⃀ 650M</tspan>
+      </text>
+
+      <!-- progress star -->
+      <g id="star-group" filter="url(#glow-soft)">
+        <path id="star-shape" fill="#ffffff"
+          d="M0 -34 C6 -12, 12 -6, 34 0 C12 6, 6 12, 0 34 C-6 12, -12 6, -34 0 C-12 -6, -6 -12, 0 -34 Z"/>
+      </g>
+      <text id="star-label" class="path-label" font-size="36" text-anchor="middle" y="0">
+        <tspan id="star-text">⃀ 16.25M</tspan>
+      </text>
+    </svg>
+  </div>
+
+  <div>
+    <div class="motivation">Let's keep moving forward</div>
+    <div class="motivation-ar">!كل إنجاز يقود إلى إنجاز أكبر</div>
+    <div class="dept">
+      <div class="ar">قسم الحلول التمويلية</div>
+      <div class="en">Financing Solutions Department</div>
+    </div>
+  </div>
+
 </div>
 
 <div class="sync-chip" id="sync-chip" style="display:none;">
@@ -457,186 +308,112 @@
 <script>
 /* ==============================================================
    CONFIGURATION
-   --------------------------------------------------------------
-   OPTION A — Remote values (recommended):
-   Paste your published Google Sheet CSV link into SHEET_URL.
-   The sheet needs 3 columns with a header row:  month, actual, target
-   The dashboard polls it every 30 seconds and updates automatically.
-
-   OPTION B — Manual values:
-   Leave SHEET_URL empty ("") and edit the three fallback values below.
    ============================================================== */
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfxJp-bPlcetEh63C-5lMvUpXvWVvqbcMhOtlh1A9VwVTHIOMmhtyfzMDy6c-xFSTLWJjKQvlM2Th/pub?output=csv";
-const SHEET_ID = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";  // from the sheet's normal link (…/d/THIS_PART/edit)
-const QUARTER_END = "";        // optional override, e.g. "2026-09-30". Empty = auto calendar quarter.
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRME1J-Gj81Ias1yImSZkXYlvYiMXABYNTwsTi6AAnat8Qly-6bGzrFZm8vn61R5iCvU0Rdm9oh9nKm/pub?output=csv";
+const SHEET_ID = "";        // optional: ID from the sheet's normal /edit link (backup connection)
+const QUARTER_END = "";     // optional override e.g. "2026-09-30"
 const POLL_SECONDS = 30;
 
-let last24h  = null;           // optional: from sheet column 'last24h'
-let lastweek = null;           // optional: from sheet column 'lastweek'
-let thisweek = null;           // optional: from sheet column 'thisweek'
-let month  = "July";           // fallback / manual values
-let actual = 3853105;
-let target = 700000000;
+let month  = "July";        // fallback values (used until the sheet connects)
+let actual = 16250000;
+let target = 650000000;
 /* ============================================================== */
 
-/* ---- helpers ---- */
-function formatSAR(value) {
-  if (value >= 1e9) return "SAR " + trimZero(value / 1e9) + "B";
-  if (value >= 1e6) return "SAR " + trimZero(value / 1e6) + "M";
-  if (value >= 1e3) return "SAR " + trimZero(value / 1e3) + "K";
-  return "SAR " + value.toLocaleString("en-US");
+const AR_ORDINALS = { 1: "الأول", 2: "الثاني", 3: "الثالث", 4: "الرابع" };
+
+function fmtM(value) {
+  if (value >= 1e9) return trim2(value / 1e9) + "B";
+  if (value >= 1e6) return trim2(value / 1e6) + "M";
+  if (value >= 1e3) return trim2(value / 1e3) + "K";
+  return String(Math.round(value));
 }
-function trimZero(n) {
-  return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, "");
+function trim2(n) { return (Math.round(n * 100) / 100).toFixed(2).replace(/\.?0+$/, ""); }
+
+function headlineFor(p) {
+  if (p >= 1)    return "Goal Achieved — Outstanding!";
+  if (p >= 0.75) return "The Goal Is Within Reach!";
+  if (p >= 0.5)  return "More Than Halfway There!";
+  if (p >= 0.25) return "Great Momentum — Keep Going!";
+  return "We're Off to a Great Start!";
 }
 
-/* Status color by achievement %:
-   green ≥ 70 · amber 40–70 · red < 40 (spec: red below 30) */
-function statusColors(pct) {
-  if (pct >= 70) return { c: "#30d158", soft: "rgba(48,209,88,0.14)",  glow: "rgba(48,209,88,0.35)"  };
-  if (pct >= 40) return { c: "#f5a623", soft: "rgba(245,166,35,0.14)", glow: "rgba(245,166,35,0.35)" };
-  return           { c: "#ff453a", soft: "rgba(255,69,58,0.14)",  glow: "rgba(255,69,58,0.35)"  };
-}
-
-/* animated count-up */
 function animateNumber(el, from, to, duration, formatter) {
   const start = performance.now();
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) { el.textContent = formatter(to); return; }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = formatter(to); return; }
   function frame(now) {
     const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 4); // easeOutQuart
+    const eased = 1 - Math.pow(1 - t, 4);
     el.textContent = formatter(from + (to - from) * eased);
     if (t < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
 
-/* ---- render ---- */
 function render() {
-  const pct = target > 0 ? (actual / target) * 100 : 0;
-  const pctClamped = Math.max(0, Math.min(pct, 100));
-  const colors = statusColors(pct);
+  const progress = target > 0 ? Math.max(0, Math.min(actual / target, 1)) : 0;
 
-  // theme
-  const root = document.documentElement.style;
-  root.setProperty("--status", colors.c);
-  root.setProperty("--status-soft", colors.soft);
-  root.setProperty("--status-glow", colors.glow);
+  // headline + big number
+  document.getElementById("headline").textContent = headlineFor(progress);
+  const numEl = document.getElementById("actual-value");
+  animateNumber(numEl, 0, actual, 1500, fmtM);
+  numEl.classList.remove("pulse"); void numEl.offsetWidth; numEl.classList.add("pulse");
 
-  // month
-  document.getElementById("month-label").textContent = month;
+  // labels on the journey
+  document.getElementById("star-text").textContent   = "⃀ " + fmtM(actual);
+  document.getElementById("target-text").textContent = "⃀ " + fmtM(target);
 
-  // numbers (count-up)
-  const actualEl = document.getElementById("actual-value");
-  const targetEl = document.getElementById("target-value");
-  const pctEl    = document.getElementById("pct-value");
+  // star position along the path (small head start so the journey
+  // always reads as "underway"; reaches the target exactly at 100%)
+  const path = document.getElementById("journey-path");
+  const L = path.getTotalLength();
+  const visual = 0.12 + 0.88 * progress;
+  const pt = path.getPointAtLength(L * Math.min(visual, 0.93)); // stop just before the bullseye
+  const star = document.getElementById("star-group");
+  star.setAttribute("transform", "translate(" + pt.x + "," + pt.y + ")");
+  const label = document.getElementById("star-label");
+  label.setAttribute("x", pt.x);
+  label.setAttribute("y", pt.y + 78);
 
-  animateNumber(actualEl, 0, actual, 1600, formatSAR);
-  targetEl.textContent = formatSAR(target);
-  animateNumber(pctEl, 0, pct, 1600, v => trimZeroPct(v) + "%");
-
-  // pulse on change
-  [actualEl, pctEl].forEach(el => {
-    el.classList.remove("pulse");
-    void el.offsetWidth; // restart animation
-    el.classList.add("pulse");
-  });
-
-  // progress bar + small percent label riding the fill edge
-  requestAnimationFrame(() => {
-    document.getElementById("progress-fill").style.width = pctClamped + "%";
-    const barPct = document.getElementById("bar-pct");
-    barPct.textContent = trimZeroPct(pct) + "%";
-    barPct.style.left = pctClamped + "%";
-    barPct.classList.toggle("outside", pctClamped < 12);
-  });
-
-  // remaining
-  const remaining = Math.max(target - actual, 0);
-  document.getElementById("remaining-label").innerHTML =
-    remaining > 0
-      ? "<strong>" + formatSAR(remaining) + "</strong>&nbsp;to goal"
-      : "<strong>Goal reached</strong>";
-
-  document.getElementById("stat-24h").textContent =
-    (last24h  !== null && !isNaN(last24h))  ? formatSAR(last24h)  : "—";
-  document.getElementById("stat-week").textContent =
-    (lastweek !== null && !isNaN(lastweek)) ? formatSAR(lastweek) : "—";
-  document.getElementById("stat-thisweek").textContent =
-    (thisweek !== null && !isNaN(thisweek)) ? formatSAR(thisweek) : "—";
-
-  document.title = "Quarter Goal — " + trimZeroPct(pct) + "%";
-  updateDaysLeft();
+  document.title = "Financing Solutions — " + month;
 }
 
-/* ---- days remaining in the quarter ---- */
+/* ---- quarter tag + countdown ---- */
 function quarterEndDate(now) {
-  if (QUARTER_END) {
-    const d = new Date(QUARTER_END + "T23:59:59");
-    if (!isNaN(d)) return d;
-  }
-  const q = Math.floor(now.getMonth() / 3);            // 0..3
-  const endMonth = q * 3 + 2;                          // 2, 5, 8, 11
-  return new Date(now.getFullYear(), endMonth + 1, 0, 23, 59, 59); // last day of quarter
+  if (QUARTER_END) { const d = new Date(QUARTER_END + "T23:59:59"); if (!isNaN(d)) return d; }
+  const q = Math.floor(now.getMonth() / 3);
+  return new Date(now.getFullYear(), q * 3 + 3, 0, 23, 59, 59);
 }
-
 const pad2 = n => String(n).padStart(2, "0");
-
-function updateDaysLeft() {
+function updateCountdown() {
   const now = new Date();
   const end = quarterEndDate(now);
-  let ms = Math.max(0, end - now);
-
-  const days  = Math.floor(ms / 86400000);  ms -= days  * 86400000;
-  const hours = Math.floor(ms / 3600000);   ms -= hours * 3600000;
-  const mins  = Math.floor(ms / 60000);     ms -= mins  * 60000;
-  const secs  = Math.floor(ms / 1000);
-
-  document.getElementById("cd-days").textContent  = days;
-  document.getElementById("cd-hours").textContent = pad2(hours);
-  document.getElementById("cd-mins").textContent  = pad2(mins);
-  document.getElementById("cd-secs").textContent  = pad2(secs);
-
   const q = Math.floor(end.getMonth() / 3) + 1;
-  document.getElementById("quarter-label").textContent = "· Q" + q + " ends " +
-    end.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  document.getElementById("q-tag").textContent = "Q" + q + " KPI";
+  document.getElementById("q-tag-ar").textContent = "هدف الربع " + (AR_ORDINALS[q] || q);
+
+  let ms = Math.max(0, end - now);
+  const days = Math.floor(ms / 86400000); ms -= days * 86400000;
+  const hours = Math.floor(ms / 3600000); ms -= hours * 3600000;
+  const mins = Math.floor(ms / 60000); ms -= mins * 60000;
+  const secs = Math.floor(ms / 1000);
+  document.getElementById("countdown-line").textContent =
+    days + "d " + pad2(hours) + "h " + pad2(mins) + "m " + pad2(secs) + "s left in Q" + q;
 }
+setInterval(updateCountdown, 1000);
 
-setInterval(updateDaysLeft, 1000); // live tick, rolls to next quarter automatically
-
-function trimZeroPct(v) {
-  return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
-}
-
-/* ---- remote sync (Google Sheet) ----
-   Accepts EITHER:
-   - a "Publish to web" CSV link (…pub?output=csv), or
-   - a normal sheet link (…/spreadsheets/d/SHEET_ID/edit…)
-     -> requires Share: "Anyone with the link" = Viewer
-*/
-function resolveSheetUrl(url) {
-  if (!url) return "";
-  if (url.includes("output=csv") || url.includes("tqx=out:csv")) return url;
-  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  if (m) return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv";
-  return url;
-}
-
-const RESOLVED_URL = resolveSheetUrl(SHEET_URL);
+/* ---- remote sync: CSV first, JSONP backup ---- */
 let lastSnapshot = "";
-let lastSyncTime = null;
 
 function setStatus(state, text) {
   const chip = document.getElementById("sync-chip");
-  if (!RESOLVED_URL && !SHEET_ID) { chip.style.display = "none"; return; }
   chip.style.display = "flex";
   chip.className = "sync-chip " + state;
   document.getElementById("sync-text").textContent = text;
 }
 
+function cleanNumber(v) { return parseFloat(String(v).replace(/[^0-9.]/g, "")); }
+
 function parseCsvLine(line) {
-  // handles simple quoted values
   const out = []; let cur = ""; let inQ = false;
   for (const ch of line) {
     if (ch === '"') inQ = !inQ;
@@ -647,60 +424,35 @@ function parseCsvLine(line) {
   return out.map(v => v.trim());
 }
 
-function applyValues(newMonth, newActual, newTarget, extras) {
+function applyValues(newMonth, newActual, newTarget) {
   if (isNaN(newActual) || isNaN(newTarget) || newTarget <= 0) {
-    setStatus("err", "Values in row 2 are not valid numbers");
-    return;
+    setStatus("err", "Values in row 2 are not valid numbers"); return;
   }
-  lastSyncTime = new Date();
-  setStatus("ok", "Live · synced " + lastSyncTime.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}));
-
-  const new24h    = extras && !isNaN(extras.last24h)  ? extras.last24h  : null;
-  const newWeek   = extras && !isNaN(extras.lastweek) ? extras.lastweek : null;
-  const newThis   = extras && !isNaN(extras.thisweek) ? extras.thisweek : null;
-
-  const snapshot = [newMonth, newActual, newTarget, new24h, newWeek, newThis].join("|");
+  setStatus("ok", "Live · " + new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}));
+  const snapshot = [newMonth, newActual, newTarget].join("|");
   if (snapshot === lastSnapshot) return;
   lastSnapshot = snapshot;
-
   month = newMonth || month; actual = newActual; target = newTarget;
-  last24h = new24h; lastweek = newWeek; thisweek = newThis;
   render();
 }
 
-function cleanNumber(v) {
-  return parseFloat(String(v).replace(/[^0-9.]/g, ""));
-}
-
-/* Method 1 — direct fetch of the published CSV */
 async function fetchCsv() {
-  const res = await fetch(RESOLVED_URL + (RESOLVED_URL.includes("?") ? "&" : "?") + "cb=" + Date.now());
+  const res = await fetch(SHEET_URL + (SHEET_URL.includes("?") ? "&" : "?") + "cb=" + Date.now());
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
   if (text.trim().startsWith("<")) throw new Error("not csv");
-
   const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) { setStatus("err", "Sheet has no data row — add values in row 2"); return true; }
-
+  if (lines.length < 2) { setStatus("err", "Sheet has no data row — add values in row 2"); return; }
   const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
-  const values  = parseCsvLine(lines[1]);
+  const values = parseCsvLine(lines[1]);
   const row = {};
   headers.forEach((h, i) => row[h] = values[i]);
-
   if (!("actual" in row) || !("target" in row)) {
-    setStatus("err", "Headers must be: month, actual, target (row 1)");
-    return true;
+    setStatus("err", "Headers must be: month, actual, target (row 1)"); return;
   }
-  applyValues(row.month, cleanNumber(row.actual), cleanNumber(row.target), {
-    last24h:  cleanNumber(row.last24h),
-    lastweek: cleanNumber(row.lastweek),
-    thisweek: cleanNumber(row.thisweek)
-  });
-  return true;
+  applyValues(row.month, cleanNumber(row.actual), cleanNumber(row.target));
 }
 
-/* Method 2 — JSONP via Google Visualization API (bypasses CORS / file:// limits).
-   Requires the sheet's Share setting: "Anyone with the link" = Viewer. */
 function fetchJsonp() {
   return new Promise((resolve, reject) => {
     if (!SHEET_ID) { reject(new Error("no sheet id")); return; }
@@ -708,7 +460,6 @@ function fetchJsonp() {
     const script = document.createElement("script");
     const timer = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 10000);
     function cleanup() { clearTimeout(timer); delete window[cbName]; script.remove(); }
-
     window[cbName] = (data) => {
       cleanup();
       try {
@@ -717,18 +468,12 @@ function fetchJsonp() {
         const row = {};
         cols.forEach((h, i) => row[h] = cells[i] ? cells[i].v : null);
         if (!("actual" in row) || !("target" in row)) {
-          setStatus("err", "Headers must be: month, actual, target (row 1)");
-          resolve(true); return;
+          setStatus("err", "Headers must be: month, actual, target (row 1)"); resolve(); return;
         }
-        applyValues(String(row.month ?? ""), cleanNumber(row.actual), cleanNumber(row.target), {
-          last24h:  cleanNumber(row.last24h),
-          lastweek: cleanNumber(row.lastweek),
-          thisweek: cleanNumber(row.thisweek)
-        });
-        resolve(true);
+        applyValues(String(row.month ?? ""), cleanNumber(row.actual), cleanNumber(row.target));
+        resolve();
       } catch (e) { reject(e); }
     };
-
     script.onerror = () => { cleanup(); reject(new Error("script load failed")); };
     script.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
                  "/gviz/tq?tqx=out:json;responseHandler:" + cbName + "&headers=1&cb=" + Date.now();
@@ -737,24 +482,43 @@ function fetchJsonp() {
 }
 
 async function fetchRemote() {
-  if (!RESOLVED_URL && !SHEET_ID) return;
-  try {
-    if (RESOLVED_URL) { await fetchCsv(); return; }
-    throw new Error("no csv url");
-  } catch (e1) {
-    try {
-      await fetchJsonp();
-    } catch (e2) {
-      setStatus("err", "Can't reach the sheet — check internet, and set Share to 'Anyone with the link' (Viewer)");
+  try { await fetchCsv(); return; }
+  catch (e1) {
+    try { await fetchJsonp(); }
+    catch (e2) {
+      setStatus("err", SHEET_ID
+        ? "Can't reach the sheet — check internet and sharing"
+        : "Can't reach the sheet — open via the GitHub link, or add SHEET_ID");
       console.warn("CSV failed:", e1, "JSONP failed:", e2);
     }
   }
 }
 
+/* riyal symbol fallback: if the ⃀ character isn't supported by the
+   device's fonts, swap the text labels to "SAR" */
+function riyalFallback() {
+  const test = document.createElement("span");
+  test.style.cssText = "position:absolute;visibility:hidden;font-size:40px;";
+  test.textContent = "⃀";
+  document.body.appendChild(test);
+  const w1 = test.offsetWidth;
+  test.textContent = "\uFFFF"; // guaranteed .notdef
+  const w2 = test.offsetWidth;
+  test.remove();
+  if (w1 === w2) { // tofu — replace with SAR
+    document.querySelectorAll("#star-text, #target-text").forEach(el => {
+      el.textContent = el.textContent.replace("⃀", "SAR");
+    });
+    window.__riyalUnsupported = true;
+  }
+}
+
 render();
+updateCountdown();
+riyalFallback();
 setStatus("", "Connecting…");
 fetchRemote();
-if (RESOLVED_URL || SHEET_ID) setInterval(fetchRemote, POLL_SECONDS * 1000);
+setInterval(fetchRemote, POLL_SECONDS * 1000);
 </script>
 
 </body>
