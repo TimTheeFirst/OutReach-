@@ -342,6 +342,59 @@
     line-height: 1;
   }
 
+  /* milestone celebration row */
+  .milestones {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1vw, 18px);
+    flex-wrap: wrap;
+    margin-top: clamp(28px, 3.4vh, 42px);
+    min-height: 1px;
+  }
+  .milestones-head {
+    font-size: clamp(13px, 0.95vw, 18px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-right: 6px;
+  }
+  .medal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px 10px 12px;
+    border-radius: 999px;
+    background: rgba(48, 209, 88, 0.12);
+    border: 1px solid rgba(48, 209, 88, 0.32);
+    font-size: clamp(15px, 1.15vw, 21px);
+    font-weight: 700;
+    color: #b8f5c8;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    animation: medalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .medal .medal-ico { width: clamp(22px, 1.8vw, 30px); height: auto; }
+  @keyframes medalPop {
+    from { opacity: 0; transform: scale(0.6) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* confetti burst */
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 12px;
+    height: 16px;
+    z-index: 40;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  @keyframes confettiFall {
+    0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(105vh) rotate(720deg); }
+  }
+
   /* sync status chip */
   .sync-chip {
     position: fixed;
@@ -428,9 +481,11 @@
       <span>100%</span>
     </div>
 
+    <div class="milestones" id="milestones"></div>
+
     <div class="stat-row">
       <div class="stat-card">
-        <div class="stat-label">Last 24H Finance</div>
+        <div class="stat-label">Today Finance</div>
         <div class="stat-value" id="stat-24h">—</div>
       </div>
       <div class="stat-card">
@@ -471,7 +526,7 @@ const SHEET_ID = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";  // from the sh
 const QUARTER_END = "";        // optional override, e.g. "2026-09-30". Empty = auto calendar quarter.
 const POLL_SECONDS = 30;
 
-let Today Request  = null;           // optional: from sheet column 'Today Request'
+let last24h  = null;           // optional: from sheet column 'last24h'
 let lastweek = null;           // optional: from sheet column 'lastweek'
 let thisweek = null;           // optional: from sheet column 'thisweek'
 let month  = "July";           // fallback / manual values
@@ -566,8 +621,66 @@ function render() {
   document.getElementById("stat-thisweek").textContent =
     (thisweek !== null && !isNaN(thisweek)) ? formatSAR(thisweek) : "—";
 
+  updateMilestones(actual);
+
   document.title = "Quarter Goal — " + trimZeroPct(pct) + "%";
   updateDaysLeft();
+}
+
+
+/* ---- milestone celebrations: one badge per SAR 50M crossed ---- */
+const MILESTONE_STEP = 50000000; // every 50M
+let lastMilestoneCount = -1;     // -1 so first render sets baseline without confetti
+
+const trophySvg =
+  '<svg class="medal-ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+  '<path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#30d158" stroke-width="1.8" fill="rgba(48,209,88,0.18)"/>' +
+  '<path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#30d158" stroke-width="1.8"/>' +
+  '<path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#30d158" stroke-width="1.8" stroke-linejoin="round"/>' +
+  '</svg>';
+
+function updateMilestones(currentActual) {
+  const count = Math.floor(currentActual / MILESTONE_STEP);
+  const row = document.getElementById("milestones");
+
+  if (count <= 0) { row.innerHTML = ""; lastMilestoneCount = 0; return; }
+
+  // rebuild the badge row
+  let html = '<span class="milestones-head">Milestones</span>';
+  for (let i = 1; i <= count; i++) {
+    html += '<span class="medal">' + trophySvg + '<span>' + fmtMilestone(i * MILESTONE_STEP) + '</span></span>';
+  }
+  row.innerHTML = html;
+
+  // celebrate only when a NEW milestone is reached (not on first paint)
+  if (lastMilestoneCount >= 0 && count > lastMilestoneCount) {
+    launchConfetti();
+  }
+  lastMilestoneCount = count;
+}
+
+function fmtMilestone(v) {
+  if (v >= 1e9) return (v/1e9) + "B";
+  return (v/1e6) + "M";
+}
+
+function launchConfetti() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const colors = ["#293BE0", "#9139FF", "#829DFF", "#30d158", "#B7B3FF", "#ffffff"];
+  const N = 90;
+  for (let i = 0; i < N; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.background = colors[i % colors.length];
+    p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+    const dur = 2.6 + Math.random() * 1.8;
+    const delay = Math.random() * 0.6;
+    p.style.animation = "confettiFall " + dur + "s ease-in " + delay + "s forwards";
+    p.style.transform = "translateX(" + (Math.random() * 60 - 30) + "px)";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+  }
 }
 
 /* ---- days remaining in the quarter ---- */
