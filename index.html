@@ -3,503 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OutReach KPI — Quarter Goal</title>
+<title>Outreach KPI — Quarter Goal</title>
 <style>
-  /* ============================================================
-     DESIGN TOKENS
-     ============================================================ */
   :root {
-    --bg-0: #0b0d12;          /* deep space navy */
+    --bg-0: #0b0d12;
     --bg-1: #11141c;
-    --card: rgba(255, 255, 255, 0.035);
-    --card-border: rgba(255, 255, 255, 0.08);
+    --card: rgba(255,255,255,0.035);
+    --card-border: rgba(255,255,255,0.08);
     --text-primary: #f5f7fa;
     --text-secondary: #8b93a7;
     --text-tertiary: #565e70;
-    --track: rgba(255, 255, 255, 0.07);
+    --track: rgba(255,255,255,0.07);
 
-    /* status palettes (set dynamically via JS) */
+    /* status palette — set dynamically by JS */
     --status: #f5a623;
-    --status-soft: rgba(245, 166, 35, 0.14);
-    --status-glow: rgba(245, 166, 35, 0.35);
+    --status-soft: rgba(245,166,35,0.14);
+    --status-glow: rgba(245,166,35,0.35);
 
-    --radius-lg: 32px;
+    --radius-lg: 22px;
     --radius-pill: 999px;
-
-    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-                  "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; min-width: 0; }
 
   html, body {
     height: 100%;
     background: var(--bg-0);
-    font-family: var(--font-stack);
+    font-family: var(--font);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
 
-  /* Ambient background — very subtle radial wash tinted by status color */
   body::before {
     content: "";
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0; z-index: -1;
     background:
-      radial-gradient(1200px 800px at 75% 15%, var(--status-soft), transparent 60%),
-      radial-gradient(900px 700px at 15% 90%, rgba(90, 120, 255, 0.05), transparent 60%),
+      radial-gradient(1200px 800px at 78% 12%, var(--status-soft), transparent 60%),
+      radial-gradient(900px 700px at 12% 92%, rgba(90,120,255,0.05), transparent 60%),
       linear-gradient(180deg, var(--bg-1), var(--bg-0));
     transition: background 1.2s ease;
-    z-index: -1;
   }
 
   .stage {
-    height: 100vh;
+    height: 100vh; width: 100vw;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4vh 5vw;
+    padding: clamp(20px, 2.4vh, 40px) clamp(22px, 2.4vw, 44px);
+    /* extra bottom room so the stat cards always clear the fixed Live chip */
+    padding-bottom: clamp(64px, 8vh, 92px);
   }
-
-  /* ============================================================
-     KPI CARD
-     ============================================================ */
-  .kpi-card {
-    width: min(1400px, 100%);
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    backdrop-filter: blur(24px);
-    box-shadow:
-      0 40px 80px -20px rgba(0, 0, 0, 0.55),
-      0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-    padding: clamp(48px, 5vw, 88px) clamp(56px, 6vw, 104px);
-    animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(24px) scale(0.985); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* --- header row ------------------------------------------- */
-  .card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: clamp(40px, 5vh, 64px);
-  }
-
-  .title-block .eyebrow {
-    font-size: clamp(14px, 1vw, 18px);
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: 12px;
-  }
-
-  .title-block h1 {
-    font-size: clamp(40px, 3.4vw, 60px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .chip-row { display: flex; gap: 16px; align-items: center; }
-
-  .days-chip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 28px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    font-size: clamp(18px, 1.4vw, 26px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  .days-chip .q-label { color: var(--text-tertiary); font-weight: 500; }
-
-  .countdown { display: flex; align-items: baseline; gap: 14px; }
-  .countdown .seg { display: flex; align-items: baseline; gap: 4px; }
-  .countdown .seg b {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: clamp(20px, 1.6vw, 30px);
-    font-variant-numeric: tabular-nums;
-    min-width: 2ch;
-    text-align: right;
-  }
-  .countdown .seg span {
-    color: var(--text-tertiary);
-    font-size: clamp(13px, 1vw, 18px);
-    font-weight: 500;
-  }
-
-  .month-chip {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 28px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    font-size: clamp(18px, 1.4vw, 26px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
-  }
-
-  .month-chip .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--status);
-    box-shadow: 0 0 12px var(--status-glow);
-    transition: background 0.8s ease, box-shadow 0.8s ease;
-  }
-
-  /* --- figures row ------------------------------------------- */
-  .figures {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 48px;
-    margin-bottom: clamp(36px, 4.5vh, 56px);
-  }
-
-  .amounts { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
-
-  .amount-actual {
-    font-size: clamp(72px, 6.5vw, 120px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .amount-divider {
-    font-size: clamp(40px, 3vw, 56px);
-    font-weight: 300;
-    color: var(--text-tertiary);
-  }
-
-  .amount-target {
-    font-size: clamp(40px, 3vw, 56px);
-    font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .amount-label {
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: 16px;
-  }
-
-  .achievement {
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .achievement .pct {
-    font-size: clamp(64px, 5.5vw, 104px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    color: var(--status);
-    font-variant-numeric: tabular-nums;
-    transition: color 0.8s ease;
-    text-shadow: 0 0 60px var(--status-glow);
-  }
-
-  .achievement .pct-label {
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-top: 16px;
-  }
-
-  /* --- progress bar ------------------------------------------ */
-  .progress-track {
-    position: relative;
-    height: clamp(24px, 2.4vh, 34px);
-    background: var(--track);
-    border-radius: var(--radius-pill);
+  .panel {
+    flex: 1;
+    display: flex; flex-direction: column;
     overflow: hidden;
   }
+  /* three balanced zones: header pinned top, hero owns the middle, stats anchor bottom */
+  .zone-top    { flex: 0 0 auto; }
+  .zone-center { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;
+                 gap: clamp(22px, 4vh, 56px); min-height: 0; padding: clamp(16px,3vh,48px) 0; }
+  .zone-bottom { flex: 0 0 auto; }
 
-  .progress-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 0%;
+  /* ---------- header ---------- */
+  .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+  .eyebrow {
+    font-size: clamp(11px, 0.85vw, 15px); font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+  .head h1 { font-size: clamp(28px, 2.6vw, 46px); font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+
+  .head-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .pill {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: var(--radius-pill);
+    background: var(--card); border: 1px solid var(--card-border);
+    font-size: clamp(14px, 1.05vw, 20px); font-weight: 600;
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .countdown { display: flex; align-items: baseline; gap: 12px; }
+  .countdown .seg { display: flex; align-items: baseline; gap: 3px; }
+  .countdown .seg b { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+  .countdown .seg span { color: var(--text-tertiary); font-size: 0.7em; font-weight: 500; }
+  .q-note { color: var(--text-tertiary); font-weight: 500; }
+  .month-pill .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--status); box-shadow: 0 0 0 4px var(--status-soft), 0 0 12px var(--status-glow);
+    transition: all 0.8s ease;
+  }
+
+  /* ---------- hero figures ---------- */
+  .hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+  .amounts .actual {
+    font-size: clamp(64px, 8vw, 156px); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 0.9; font-variant-numeric: tabular-nums;
+  }
+  .amounts .actual .slash { color: var(--text-tertiary); font-weight: 300; }
+  .amounts .target {
+    font-size: clamp(24px, 2.4vw, 46px); font-weight: 600;
+    color: var(--text-secondary); margin-top: 12px; font-variant-numeric: tabular-nums;
+  }
+  .amounts .amt-label {
+    font-size: clamp(11px, 0.85vw, 15px); font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 16px;
+  }
+  .pct-block { text-align: right; padding-top: clamp(20px, 3vh, 60px); }
+  .pct {
+    font-size: clamp(60px, 6.6vw, 128px); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 0.9; color: var(--status);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 40px var(--status-glow);
+    transition: color 0.8s ease, text-shadow 0.8s ease;
+  }
+  .pct-label {
+    font-size: clamp(11px, 0.85vw, 15px); font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 14px;
+  }
+
+  /* ---------- progress ---------- */
+  .track {
+    position: relative; height: clamp(24px, 2.8vh, 38px);
+    background: var(--track); border-radius: var(--radius-pill); overflow: hidden;
+  }
+  .fill {
+    position: absolute; inset: 0 auto 0 0; width: 0%;
     border-radius: var(--radius-pill);
-    background: linear-gradient(90deg,
-      color-mix(in srgb, var(--status) 70%, #ffffff 8%) 0%,
-      var(--status) 100%);
-    box-shadow: 0 0 32px var(--status-glow);
-    transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1),
-                background 0.8s ease,
-                box-shadow 0.8s ease;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--status) 55%, #000 45%), var(--status));
+    box-shadow: 0 0 24px var(--status-glow);
+    transition: width 1.6s cubic-bezier(0.22,1,0.36,1), background 0.8s ease;
   }
-
-  /* moving sheen on the fill */
-  .progress-fill::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg,
-      transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
-    background-size: 240px 100%;
-    background-repeat: no-repeat;
-    animation: sheen 3.5s ease-in-out infinite;
-  }
-
-  @keyframes sheen {
-    0%   { background-position: -240px 0; }
-    55%  { background-position: calc(100% + 240px) 0; }
-    100% { background-position: calc(100% + 240px) 0; }
-  }
-
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-    font-size: clamp(15px, 1.1vw, 20px);
-    font-weight: 500;
-    color: var(--text-tertiary);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .progress-meta .remaining strong {
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
-
-  /* value-change pulse (applied via JS when numbers update) */
-  .pulse { animation: pulse 0.7s ease; }
-  @keyframes pulse {
-    0%   { transform: scale(1); }
-    35%  { transform: scale(1.03); }
-    100% { transform: scale(1); }
-  }
-
-  /* percent label on the bar */
   .bar-pct {
-    position: absolute;
-    top: 50%;
-    transform: translate(-110%, -50%);
-    font-size: clamp(13px, 1vw, 18px);
-    font-weight: 700;
-    color: #0b0d12;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s ease;
-    pointer-events: none;
-    z-index: 2;
+    position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
+    font-size: clamp(12px, 1vw, 17px); font-weight: 800; color: #fff;
+    font-variant-numeric: tabular-nums; white-space: nowrap; z-index: 2;
+    transition: left 1.6s cubic-bezier(0.22,1,0.36,1);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
-  .bar-pct.outside {
-    transform: translate(12px, -50%);
-    color: var(--status);
+  .track-meta {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 12px;
+    font-size: clamp(13px, 1vw, 18px); color: var(--text-tertiary); font-variant-numeric: tabular-nums;
   }
+  .track-meta .remaining { color: var(--text-secondary); }
+  .track-meta .remaining strong { color: var(--text-primary); font-weight: 700; }
 
-  /* secondary stat cards */
-  .stat-row {
-    display: flex;
-    gap: clamp(20px, 2vw, 32px);
-    margin-top: clamp(32px, 4vh, 48px);
-  }
-  .stat-card {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: clamp(24px, 2.6vh, 36px) clamp(28px, 2.4vw, 40px);
-  }
-  .stat-card .stat-label {
-    font-size: clamp(14px, 1vw, 19px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-bottom: 14px;
-  }
-  .stat-card .stat-value {
-    font-size: clamp(34px, 2.8vw, 52px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  /* milestone celebration row */
-  .milestones {
-    display: flex;
-    align-items: center;
-    gap: clamp(10px, 1vw, 18px);
-    flex-wrap: wrap;
-    margin-top: clamp(28px, 3.4vh, 42px);
-    min-height: 1px;
-  }
+  /* ---------- milestones ---------- */
+  .milestones { display: flex; align-items: center; gap: clamp(8px, 0.8vw, 14px); flex-wrap: wrap; }
   .milestones-head {
-    font-size: clamp(13px, 0.95vw, 18px);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin-right: 6px;
+    font-size: clamp(11px, 0.85vw, 15px); font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-tertiary); margin-right: 4px;
   }
   .medal {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px 10px 12px;
-    border-radius: 999px;
-    background: rgba(48, 209, 88, 0.12);
-    border: 1px solid rgba(48, 209, 88, 0.32);
-    font-size: clamp(15px, 1.15vw, 21px);
-    font-weight: 700;
-    color: #b8f5c8;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    animation: medalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px 9px 12px; border-radius: var(--radius-pill);
+    background: rgba(52,199,120,0.10); border: 1px solid rgba(52,199,120,0.30);
+    font-size: clamp(13px, 1vw, 18px); font-weight: 700; color: #4ade9a;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-  .medal .medal-ico { width: clamp(22px, 1.8vw, 30px); height: auto; }
-  @keyframes medalPop {
-    from { opacity: 0; transform: scale(0.6) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
+  .medal svg { width: clamp(17px, 1.3vw, 22px); height: auto; }
+  @keyframes pop { from { opacity:0; transform: scale(0.6) translateY(6px);} to { opacity:1; transform:none;} }
 
-  /* confetti burst */
-  .confetti-piece {
-    position: fixed;
-    top: -20px;
-    width: 12px;
-    height: 16px;
-    z-index: 40;
-    opacity: 0;
-    will-change: transform, opacity;
+  /* ---------- stat cards ---------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(12px, 1.2vw, 20px); }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg); padding: clamp(16px, 2.2vh, 28px) clamp(16px, 1.5vw, 26px);
   }
+  .stat-card.highlight { border-color: var(--status-soft); background: var(--status-soft); }
+  .stat-label {
+    font-size: clamp(11px, 0.82vw, 15px); font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 14px;
+  }
+  .stat-value {
+    font-size: clamp(26px, 2.4vw, 46px); font-weight: 800; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .stat-card.highlight .stat-value { color: var(--status); }
+
+  .pulse { animation: pulse 0.7s ease; }
+  @keyframes pulse { 0%{transform:scale(1)} 35%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+  /* confetti */
+  .confetti-piece { position: fixed; top:-20px; width:11px; height:15px; z-index:40; opacity:0; will-change: transform, opacity; }
   @keyframes confettiFall {
-    0%   { opacity: 1; transform: translateY(-20px) rotate(0deg); }
-    100% { opacity: 0; transform: translateY(105vh) rotate(720deg); }
+    0% { opacity:1; transform: translate(0,-20px) rotate(0);}
+    100% { opacity:0; transform: translate(var(--drift,0), 105vh) rotate(720deg);}
   }
 
-  /* sync status chip */
   .sync-chip {
-    position: fixed;
-    bottom: 20px;
-    right: 24px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--card-border);
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-tertiary);
-    z-index: 10;
+    position: fixed; bottom: 18px; right: 22px; z-index: 10;
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 16px; border-radius: var(--radius-pill);
+    background: rgba(20,24,34,0.85); border: 1px solid var(--card-border);
+    font-size: 13px; font-weight: 500; color: var(--text-secondary);
   }
-  .sync-chip .sync-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #565e70;
-  }
-  .sync-chip.ok .sync-dot { background: #30d158; box-shadow: 0 0 8px rgba(48,209,88,0.5); }
-  .sync-chip.err .sync-dot { background: #ff453a; box-shadow: 0 0 8px rgba(255,69,58,0.5); }
-  .sync-chip.err { color: #ff8a80; }
+  .sync-chip .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-tertiary); }
+  .sync-chip.ok  .sync-dot { background: #34c778; box-shadow: 0 0 0 3px rgba(52,199,120,0.2); }
+  .sync-chip.err .sync-dot { background: #f0554d; box-shadow: 0 0 0 3px rgba(240,85,77,0.2); }
+  .sync-chip.err { color: #ff8b85; }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation: none !important;
-      transition: none !important;
-    }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
 
 <div class="stage">
-  <div class="kpi-card">
+  <div class="panel">
 
-    <div class="card-header">
-      <div class="title-block">
-                <div class="eyebrow">OutReach KPI</div>
+    <!-- header -->
+    <div class="zone-top">
+    <div class="head">
+      <div>
+        <div class="eyebrow">Outreach KPI</div>
         <h1>Quarter Goal</h1>
       </div>
-      <div class="chip-row">
-        <div class="days-chip">
+      <div class="head-right">
+        <div class="pill">
           <span class="countdown">
             <span class="seg"><b id="cd-days">—</b><span>d</span></span>
             <span class="seg"><b id="cd-hours">—</b><span>h</span></span>
             <span class="seg"><b id="cd-mins">—</b><span>m</span></span>
             <span class="seg"><b id="cd-secs">—</b><span>s</span></span>
           </span>
-          <span class="q-label" id="quarter-label"></span>
+          <span class="q-note" id="quarter-label"></span>
         </div>
-        <div class="month-chip">
+        <div class="pill month-pill">
           <span class="dot"></span>
           <span id="month-label">—</span>
         </div>
       </div>
     </div>
+    </div>
 
-    <div class="figures">
-      <div>
-        <div class="amounts">
-          <span class="amount-actual" id="actual-value">SAR 0</span>
-          <span class="amount-divider">/</span>
-          <span class="amount-target" id="target-value">SAR 0</span>
-        </div>
-        <div class="amount-label">Quarter achieved · Quarter target</div>
+    <!-- center: hero + progress + milestones share the vertical middle -->
+    <div class="zone-center">
+
+    <!-- hero -->
+    <div class="hero">
+      <div class="amounts">
+        <div class="actual"><span id="actual-value">SAR 0</span> <span class="slash">/</span></div>
+        <div class="target" id="target-value">SAR 0</div>
+        <div class="amt-label">Quarter Achieved · Quarter Target</div>
       </div>
-
-      <div class="achievement">
+      <div class="pct-block">
         <div class="pct" id="pct-value">0%</div>
         <div class="pct-label">Achievement</div>
       </div>
     </div>
 
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-      <span class="bar-pct" id="bar-pct">0%</span>
-    </div>
-    <div class="progress-meta">
-      <span>0%</span>
-      <span class="remaining" id="remaining-label"></span>
-      <span>100%</span>
+    <!-- progress -->
+    <div>
+      <div class="track">
+        <div class="fill" id="progress-fill"></div>
+        <span class="bar-pct" id="bar-pct">0%</span>
+      </div>
+      <div class="track-meta">
+        <span>0%</span>
+        <span class="remaining" id="remaining-label"></span>
+        <span>100%</span>
+      </div>
     </div>
 
+    <!-- milestones -->
     <div class="milestones" id="milestones"></div>
 
-    <div class="stat-row">
+    </div><!-- /zone-center -->
+
+    <!-- stats -->
+    <div class="zone-bottom">
+    <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Today Finance</div>
         <div class="stat-value" id="stat-24h">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Last Week Finance</div>
-        <div class="stat-value" id="stat-week">—</div>
-      </div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-card">
         <div class="stat-label">This Week Finance</div>
         <div class="stat-value" id="stat-thisweek">—</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-label">Last Week Finance</div>
+        <div class="stat-value" id="stat-week">—</div>
+      </div>
+      <div class="stat-card highlight">
+        <div class="stat-label" id="prev-month-label">Last Month Finance</div>
+        <div class="stat-value" id="stat-prevmonth">—</div>
+      </div>
     </div>
+    </div><!-- /zone-bottom -->
 
   </div>
 </div>
@@ -512,222 +304,200 @@
 <script>
 /* ==============================================================
    CONFIGURATION
-   --------------------------------------------------------------
-   OPTION A — Remote values (recommended):
-   Paste your published Google Sheet CSV link into SHEET_URL.
-   The sheet needs 3 columns with a header row:  month, actual, target
-   The dashboard polls it every 30 seconds and updates automatically.
-
-   OPTION B — Manual values:
-   Leave SHEET_URL empty ("") and edit the three fallback values below.
+   Google Sheet header row (row 1):  month, actual, target
+   Optional columns: last24h, lastweek, thisweek, jun, jul, aug
+   The jun/jul/aug columns drive the monthly cards AND the new
+   "Last Month Finance" figure. Fill them in to see previous months.
    ============================================================== */
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfxJp-bPlcetEh63C-5lMvUpXvWVvqbcMhOtlh1A9VwVTHIOMmhtyfzMDy6c-xFSTLWJjKQvlM2Th/pub?output=csv";
-const SHEET_ID = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";  // from the sheet's normal link (…/d/THIS_PART/edit)
-const QUARTER_END = "";        // optional override, e.g. "2026-09-30". Empty = auto calendar quarter.
+const SHEET_ID = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";
+const QUARTER_END = "";        // e.g. "2026-09-30". Empty = auto calendar quarter.
 const POLL_SECONDS = 30;
 
-let last24h  = null;           // optional: from sheet column 'last24h'
-let lastweek = null;           // optional: from sheet column 'lastweek'
-let thisweek = null;           // optional: from sheet column 'thisweek'
-let month  = "July";           // fallback / manual values
-let actual = 3853105;
+let last24h  = null;
+let lastweek = null;
+let thisweek = null;
+let months = { jun: null, jul: null, aug: null };
+let month  = "August";
+let actual = 171400000;
 let target = 700000000;
 /* ============================================================== */
 
-/* ---- helpers ---- */
 function formatSAR(value) {
   if (value >= 1e9) return "SAR " + trimZero(value / 1e9) + "B";
   if (value >= 1e6) return "SAR " + trimZero(value / 1e6) + "M";
   if (value >= 1e3) return "SAR " + trimZero(value / 1e3) + "K";
   return "SAR " + value.toLocaleString("en-US");
 }
-function trimZero(n) {
-  return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, "");
-}
+function trimZero(n) { return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, ""); }
+function trimZeroPct(v) { return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""); }
 
-/* Status color by achievement %:
-   green ≥ 70 · amber 40–70 · red < 40 (spec: red below 30) */
 function statusColors(pct) {
-  if (pct >= 70) return { c: "#30d158", soft: "rgba(48,209,88,0.14)",  glow: "rgba(48,209,88,0.35)"  };
-  if (pct >= 40) return { c: "#f5a623", soft: "rgba(245,166,35,0.14)", glow: "rgba(245,166,35,0.35)" };
-  return           { c: "#ff453a", soft: "rgba(255,69,58,0.14)",  glow: "rgba(255,69,58,0.35)"  };
+  if (pct >= 70) return { c:"#34c778", soft:"rgba(52,199,120,0.14)",  glow:"rgba(52,199,120,0.35)" };
+  if (pct >= 40) return { c:"#f5a623", soft:"rgba(245,166,35,0.14)",  glow:"rgba(245,166,35,0.35)" };
+  return           { c:"#f0554d", soft:"rgba(240,85,77,0.14)",   glow:"rgba(240,85,77,0.40)"  };
 }
 
-/* animated count-up */
 function animateNumber(el, from, to, duration, formatter) {
-  const start = performance.now();
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) { el.textContent = formatter(to); return; }
+  const start = performance.now();
   function frame(now) {
     const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 4); // easeOutQuart
+    const eased = 1 - Math.pow(1 - t, 4);
     el.textContent = formatter(from + (to - from) * eased);
     if (t < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
 
-/* ---- render ---- */
 function render() {
   const pct = target > 0 ? (actual / target) * 100 : 0;
   const pctClamped = Math.max(0, Math.min(pct, 100));
   const colors = statusColors(pct);
 
-  // theme
   const root = document.documentElement.style;
   root.setProperty("--status", colors.c);
   root.setProperty("--status-soft", colors.soft);
   root.setProperty("--status-glow", colors.glow);
 
-  // month
   document.getElementById("month-label").textContent = month;
 
-  // numbers (count-up)
   const actualEl = document.getElementById("actual-value");
-  const targetEl = document.getElementById("target-value");
   const pctEl    = document.getElementById("pct-value");
-
+  document.getElementById("target-value").textContent = formatSAR(target);
   animateNumber(actualEl, 0, actual, 1600, formatSAR);
-  targetEl.textContent = formatSAR(target);
   animateNumber(pctEl, 0, pct, 1600, v => trimZeroPct(v) + "%");
+  [actualEl, pctEl].forEach(el => { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); });
 
-  // pulse on change
-  [actualEl, pctEl].forEach(el => {
-    el.classList.remove("pulse");
-    void el.offsetWidth; // restart animation
-    el.classList.add("pulse");
-  });
-
-  // progress bar + small percent label riding the fill edge
   requestAnimationFrame(() => {
     document.getElementById("progress-fill").style.width = pctClamped + "%";
     const barPct = document.getElementById("bar-pct");
     barPct.textContent = trimZeroPct(pct) + "%";
-    barPct.style.left = pctClamped + "%";
-    barPct.classList.toggle("outside", pctClamped < 12);
+    barPct.style.left = Math.max(pctClamped, 6) + "%";
   });
 
-  // remaining
   const remaining = Math.max(target - actual, 0);
   document.getElementById("remaining-label").innerHTML =
-    remaining > 0
-      ? "<strong>" + formatSAR(remaining) + "</strong>&nbsp;to goal"
-      : "<strong>Goal reached</strong>";
+    remaining > 0 ? "<strong>" + formatSAR(remaining) + "</strong> to goal" : "<strong>Goal reached</strong>";
 
-  document.getElementById("stat-24h").textContent =
-    (last24h  !== null && !isNaN(last24h))  ? formatSAR(last24h)  : "—";
-  document.getElementById("stat-week").textContent =
-    (lastweek !== null && !isNaN(lastweek)) ? formatSAR(lastweek) : "—";
-  document.getElementById("stat-thisweek").textContent =
-    (thisweek !== null && !isNaN(thisweek)) ? formatSAR(thisweek) : "—";
+  document.getElementById("stat-24h").textContent      = (last24h  != null && !isNaN(last24h))  ? formatSAR(last24h)  : "—";
+  document.getElementById("stat-week").textContent     = (lastweek != null && !isNaN(lastweek)) ? formatSAR(lastweek) : "—";
+  document.getElementById("stat-thisweek").textContent = (thisweek != null && !isNaN(thisweek)) ? formatSAR(thisweek) : "—";
 
   updateMilestones(actual);
+  updatePrevMonth();
 
   document.title = "Quarter Goal — " + trimZeroPct(pct) + "%";
   updateDaysLeft();
 }
 
+/* ---- previous month financed ----
+   Shows the calendar month BEFORE the current one, using the sheet's
+   jun/jul/aug columns. It ONLY ever shows a real month value — it never
+   falls back to the quarter total, so it can't silently mislead. */
+function monthVal(key) {
+  const v = months[key];
+  return (v != null && !isNaN(v)) ? v : null;
+}
+function updatePrevMonth() {
+  const keys  = ["jun", "jul", "aug"];
+  const names = { jun: "June", jul: "July", aug: "August" };
+  const labelEl = document.getElementById("prev-month-label");
+  const valEl   = document.getElementById("stat-prevmonth");
+  const cardEl  = valEl.closest(".stat-card");
 
-/* ---- milestone celebrations: one badge per SAR 50M crossed ---- */
-const MILESTONE_STEP = 50000000; // every 50M
-let lastMilestoneCount = -1;     // -1 so first render sets baseline without confetti
+  // which quarter-month is "now"? Jun/Jul/Aug -> 0/1/2 ; else use last month with data
+  const curIdx = { 5: 0, 6: 1, 7: 2 }[new Date().getMonth()];
+  let idx = (curIdx !== undefined) ? curIdx - 1 : -1;
 
+  // if the target month has no data, step back to the most recent month that does
+  while (idx >= 0 && monthVal(keys[idx]) === null) idx--;
+  // outside Jun–Aug with no target: use latest funded month
+  if (curIdx === undefined) {
+    idx = -1;
+    for (let i = keys.length - 1; i >= 0; i--) { if (monthVal(keys[i]) !== null) { idx = i; break; } }
+  }
+
+  if (idx < 0) {
+    labelEl.textContent = "Last Month Finance";
+    valEl.textContent = "—";
+    valEl.title = "Add a jun / jul / aug column to your sheet to show this";
+    cardEl && cardEl.classList.remove("highlight");
+    return;
+  }
+  const key = keys[idx];
+  labelEl.textContent = names[key] + " Finance";
+  valEl.textContent = formatSAR(monthVal(key));
+  valEl.removeAttribute("title");
+  cardEl && cardEl.classList.add("highlight");
+}
+
+/* ---- milestones ---- */
+const MILESTONE_STEP = 50000000;
+let lastMilestoneCount = -1;
 const trophySvg =
-  '<svg class="medal-ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-  '<path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#30d158" stroke-width="1.8" fill="rgba(48,209,88,0.18)"/>' +
-  '<path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#30d158" stroke-width="1.8"/>' +
-  '<path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#30d158" stroke-width="1.8" stroke-linejoin="round"/>' +
-  '</svg>';
+  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+  '<path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#4ade9a" stroke-width="1.8" fill="rgba(52,199,120,0.16)"/>' +
+  '<path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#4ade9a" stroke-width="1.8"/>' +
+  '<path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#4ade9a" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 
 function updateMilestones(currentActual) {
   const count = Math.floor(currentActual / MILESTONE_STEP);
   const row = document.getElementById("milestones");
-
   if (count <= 0) { row.innerHTML = ""; lastMilestoneCount = 0; return; }
-
-  // rebuild the badge row
   let html = '<span class="milestones-head">Milestones</span>';
-  for (let i = 1; i <= count; i++) {
+  for (let i = 1; i <= count; i++)
     html += '<span class="medal">' + trophySvg + '<span>' + fmtMilestone(i * MILESTONE_STEP) + '</span></span>';
-  }
   row.innerHTML = html;
-
-  // celebrate only when a NEW milestone is reached (not on first paint)
-  if (lastMilestoneCount >= 0 && count > lastMilestoneCount) {
-    launchConfetti();
-  }
+  if (lastMilestoneCount >= 0 && count > lastMilestoneCount) launchConfetti();
   lastMilestoneCount = count;
 }
-
-function fmtMilestone(v) {
-  if (v >= 1e9) return (v/1e9) + "B";
-  return (v/1e6) + "M";
-}
+function fmtMilestone(v) { return v >= 1e9 ? (v/1e9) + "B" : (v/1e6) + "M"; }
 
 function launchConfetti() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const colors = ["#293BE0", "#9139FF", "#829DFF", "#30d158", "#B7B3FF", "#ffffff"];
-  const N = 90;
-  for (let i = 0; i < N; i++) {
+  const colors = ["#5a78ff","#8b5cf6","#34c778","#a78bfa","#6366f1"];
+  for (let i = 0; i < 80; i++) {
     const p = document.createElement("div");
     p.className = "confetti-piece";
-    p.style.left = Math.random() * 100 + "vw";
+    p.style.left = Math.random()*100 + "vw";
     p.style.background = colors[i % colors.length];
     p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
-    const dur = 2.6 + Math.random() * 1.8;
-    const delay = Math.random() * 0.6;
+    p.style.setProperty("--drift", (Math.random()*160 - 80) + "px");
+    const dur = 2.6 + Math.random()*1.8, delay = Math.random()*0.4;
     p.style.animation = "confettiFall " + dur + "s ease-in " + delay + "s forwards";
-    p.style.transform = "translateX(" + (Math.random() * 60 - 30) + "px)";
+    p.addEventListener("animationend", () => p.remove());
     document.body.appendChild(p);
-    setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+    setTimeout(() => p.remove(), (dur+delay)*1000 + 500);
   }
 }
 
-/* ---- days remaining in the quarter ---- */
+/* ---- countdown ---- */
 function quarterEndDate(now) {
-  if (QUARTER_END) {
-    const d = new Date(QUARTER_END + "T23:59:59");
-    if (!isNaN(d)) return d;
-  }
-  const q = Math.floor(now.getMonth() / 3);            // 0..3
-  const endMonth = q * 3 + 2;                          // 2, 5, 8, 11
-  return new Date(now.getFullYear(), endMonth + 1, 0, 23, 59, 59); // last day of quarter
+  if (QUARTER_END) { const d = new Date(QUARTER_END + "T23:59:59"); if (!isNaN(d)) return d; }
+  const q = Math.floor(now.getMonth()/3);
+  return new Date(now.getFullYear(), q*3 + 3, 0, 23, 59, 59);
 }
-
 const pad2 = n => String(n).padStart(2, "0");
-
 function updateDaysLeft() {
-  const now = new Date();
-  const end = quarterEndDate(now);
+  const now = new Date(), end = quarterEndDate(now);
   let ms = Math.max(0, end - now);
-
-  const days  = Math.floor(ms / 86400000);  ms -= days  * 86400000;
-  const hours = Math.floor(ms / 3600000);   ms -= hours * 3600000;
-  const mins  = Math.floor(ms / 60000);     ms -= mins  * 60000;
-  const secs  = Math.floor(ms / 1000);
-
+  const days=Math.floor(ms/86400000); ms-=days*86400000;
+  const hours=Math.floor(ms/3600000); ms-=hours*3600000;
+  const mins=Math.floor(ms/60000);    ms-=mins*60000;
+  const secs=Math.floor(ms/1000);
   document.getElementById("cd-days").textContent  = days;
   document.getElementById("cd-hours").textContent = pad2(hours);
   document.getElementById("cd-mins").textContent  = pad2(mins);
   document.getElementById("cd-secs").textContent  = pad2(secs);
-
-  const q = Math.floor(end.getMonth() / 3) + 1;
-  document.getElementById("quarter-label").textContent = "· Q" + q + " ends " +
-    end.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const q = Math.floor(end.getMonth()/3) + 1;
+  document.getElementById("quarter-label").textContent =
+    "· Q" + q + " ends " + end.toLocaleDateString("en-US", { month:"short", day:"numeric" });
 }
+setInterval(updateDaysLeft, 1000);
 
-setInterval(updateDaysLeft, 1000); // live tick, rolls to next quarter automatically
-
-function trimZeroPct(v) {
-  return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
-}
-
-/* ---- remote sync (Google Sheet) ----
-   Accepts EITHER:
-   - a "Publish to web" CSV link (…pub?output=csv), or
-   - a normal sheet link (…/spreadsheets/d/SHEET_ID/edit…)
-     -> requires Share: "Anyone with the link" = Viewer
-*/
+/* ---- remote sync ---- */
 function resolveSheetUrl(url) {
   if (!url) return "";
   if (url.includes("output=csv") || url.includes("tqx=out:csv")) return url;
@@ -735,10 +505,8 @@ function resolveSheetUrl(url) {
   if (m) return "https://docs.google.com/spreadsheets/d/" + m[1] + "/gviz/tq?tqx=out:csv";
   return url;
 }
-
 const RESOLVED_URL = resolveSheetUrl(SHEET_URL);
 let lastSnapshot = "";
-let lastSyncTime = null;
 
 function setStatus(state, text) {
   const chip = document.getElementById("sync-chip");
@@ -747,120 +515,84 @@ function setStatus(state, text) {
   chip.className = "sync-chip " + state;
   document.getElementById("sync-text").textContent = text;
 }
-
 function parseCsvLine(line) {
-  // handles simple quoted values
-  const out = []; let cur = ""; let inQ = false;
+  const out = []; let cur = "", inQ = false;
   for (const ch of line) {
     if (ch === '"') inQ = !inQ;
     else if (ch === "," && !inQ) { out.push(cur); cur = ""; }
     else cur += ch;
   }
-  out.push(cur);
-  return out.map(v => v.trim());
+  out.push(cur); return out.map(v => v.trim());
 }
+function cleanNumber(v) { return parseFloat(String(v).replace(/[^0-9.]/g, "")); }
 
 function applyValues(newMonth, newActual, newTarget, extras) {
-  if (isNaN(newActual) || isNaN(newTarget) || newTarget <= 0) {
-    setStatus("err", "Values in row 2 are not valid numbers");
-    return;
-  }
-  lastSyncTime = new Date();
-  setStatus("ok", "Live · synced " + lastSyncTime.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}));
-
-  const new24h    = extras && !isNaN(extras.last24h)  ? extras.last24h  : null;
-  const newWeek   = extras && !isNaN(extras.lastweek) ? extras.lastweek : null;
-  const newThis   = extras && !isNaN(extras.thisweek) ? extras.thisweek : null;
-
-  const snapshot = [newMonth, newActual, newTarget, new24h, newWeek, newThis].join("|");
-  if (snapshot === lastSnapshot) return;
-  lastSnapshot = snapshot;
-
+  if (isNaN(newActual) || isNaN(newTarget) || newTarget <= 0) { setStatus("err","Row 2 values are not valid numbers"); return; }
+  setStatus("ok","Live · synced " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}));
+  const e = extras || {};
+  const snap = [newMonth,newActual,newTarget,e.last24h,e.lastweek,e.thisweek,e.jun,e.jul,e.aug].join("|");
+  if (snap === lastSnapshot) return;
+  lastSnapshot = snap;
   month = newMonth || month; actual = newActual; target = newTarget;
-  last24h = new24h; lastweek = newWeek; thisweek = newThis;
+  last24h  = !isNaN(e.last24h)  ? e.last24h  : null;
+  lastweek = !isNaN(e.lastweek) ? e.lastweek : null;
+  thisweek = !isNaN(e.thisweek) ? e.thisweek : null;
+  months = { jun: !isNaN(e.jun)?e.jun:null, jul: !isNaN(e.jul)?e.jul:null, aug: !isNaN(e.aug)?e.aug:null };
   render();
 }
 
-function cleanNumber(v) {
-  return parseFloat(String(v).replace(/[^0-9.]/g, ""));
-}
-
-/* Method 1 — direct fetch of the published CSV */
 async function fetchCsv() {
-  const res = await fetch(RESOLVED_URL + (RESOLVED_URL.includes("?") ? "&" : "?") + "cb=" + Date.now());
+  const res = await fetch(RESOLVED_URL + (RESOLVED_URL.includes("?")?"&":"?") + "cb=" + Date.now());
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
   if (text.trim().startsWith("<")) throw new Error("not csv");
-
   const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) { setStatus("err", "Sheet has no data row — add values in row 2"); return true; }
-
+  if (lines.length < 2) { setStatus("err","Sheet has no data row"); return true; }
   const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
   const values  = parseCsvLine(lines[1]);
-  const row = {};
-  headers.forEach((h, i) => row[h] = values[i]);
-
-  if (!("actual" in row) || !("target" in row)) {
-    setStatus("err", "Headers must be: month, actual, target (row 1)");
-    return true;
-  }
+  const row = {}; headers.forEach((h,i)=> row[h] = values[i]);
+  if (!("actual" in row) || !("target" in row)) { setStatus("err","Headers must include: month, actual, target"); return true; }
   applyValues(row.month, cleanNumber(row.actual), cleanNumber(row.target), {
-    last24h:  cleanNumber(row.last24h),
-    lastweek: cleanNumber(row.lastweek),
-    thisweek: cleanNumber(row.thisweek)
+    last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek),
+    jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug)
   });
   return true;
 }
 
-/* Method 2 — JSONP via Google Visualization API (bypasses CORS / file:// limits).
-   Requires the sheet's Share setting: "Anyone with the link" = Viewer. */
 function fetchJsonp() {
   return new Promise((resolve, reject) => {
     if (!SHEET_ID) { reject(new Error("no sheet id")); return; }
-    const cbName = "gvizCb_" + Date.now();
+    const cb = "gvizCb_" + Date.now();
     const script = document.createElement("script");
     const timer = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 10000);
-    function cleanup() { clearTimeout(timer); delete window[cbName]; script.remove(); }
-
-    window[cbName] = (data) => {
+    function cleanup() { clearTimeout(timer); delete window[cb]; script.remove(); }
+    window[cb] = (data) => {
       cleanup();
       try {
         const cols = data.table.cols.map(c => (c.label || "").toLowerCase().trim());
         const cells = data.table.rows[0].c;
-        const row = {};
-        cols.forEach((h, i) => row[h] = cells[i] ? cells[i].v : null);
-        if (!("actual" in row) || !("target" in row)) {
-          setStatus("err", "Headers must be: month, actual, target (row 1)");
-          resolve(true); return;
-        }
+        const row = {}; cols.forEach((h,i)=> row[h] = cells[i] ? cells[i].v : null);
+        if (!("actual" in row) || !("target" in row)) { setStatus("err","Headers must include: month, actual, target"); resolve(true); return; }
         applyValues(String(row.month ?? ""), cleanNumber(row.actual), cleanNumber(row.target), {
-          last24h:  cleanNumber(row.last24h),
-          lastweek: cleanNumber(row.lastweek),
-          thisweek: cleanNumber(row.thisweek)
+          last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek),
+          jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug)
         });
         resolve(true);
-      } catch (e) { reject(e); }
+      } catch (err) { reject(err); }
     };
-
     script.onerror = () => { cleanup(); reject(new Error("script load failed")); };
     script.src = "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
-                 "/gviz/tq?tqx=out:json;responseHandler:" + cbName + "&headers=1&cb=" + Date.now();
+                 "/gviz/tq?tqx=out:json;responseHandler:" + cb + "&headers=1&cb=" + Date.now();
     document.head.appendChild(script);
   });
 }
 
 async function fetchRemote() {
   if (!RESOLVED_URL && !SHEET_ID) return;
-  try {
-    if (RESOLVED_URL) { await fetchCsv(); return; }
-    throw new Error("no csv url");
-  } catch (e1) {
-    try {
-      await fetchJsonp();
-    } catch (e2) {
-      setStatus("err", "Can't reach the sheet — check internet, and set Share to 'Anyone with the link' (Viewer)");
-      console.warn("CSV failed:", e1, "JSONP failed:", e2);
-    }
+  try { if (RESOLVED_URL) { await fetchCsv(); return; } throw new Error("no csv"); }
+  catch (e1) {
+    try { await fetchJsonp(); }
+    catch (e2) { setStatus("err","Can't reach the sheet — check sharing is 'Anyone with the link'"); console.warn(e1, e2); }
   }
 }
 
