@@ -53,10 +53,12 @@
   .progress-meta .remaining strong { color:var(--text-secondary); font-weight:600; }
 
   /* milestones + next-milestone */
-  .milestones-wrap { display:flex; align-items:center; gap:clamp(14px,1.4vw,26px); flex-wrap:wrap; }
-  .milestones { display:flex; align-items:center; gap:clamp(10px,1vw,16px); flex-wrap:wrap; min-height:1px; }
+  .milestones-wrap { display:flex; align-items:flex-start; gap:clamp(14px,1.4vw,26px); flex-wrap:wrap; }
+  .milestones { display:flex; align-items:flex-start; gap:clamp(10px,1vw,16px); flex-wrap:wrap; min-height:1px; }
   .milestones-head { font-size:clamp(12px,0.95vw,18px); font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-tertiary); margin-right:4px; }
-  .medal { display:inline-flex; align-items:center; gap:8px; padding:9px 16px 9px 11px; border-radius:999px; background:rgba(48,209,88,0.12); border:1px solid rgba(48,209,88,0.32); font-size:clamp(14px,1.1vw,20px); font-weight:700; color:#b8f5c8; font-variant-numeric:tabular-nums; white-space:nowrap; animation:medalPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .medal-col { display:inline-flex; flex-direction:column; align-items:center; gap:6px; animation:medalPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .medal { display:inline-flex; align-items:center; gap:8px; padding:9px 16px 9px 11px; border-radius:999px; background:rgba(48,209,88,0.12); border:1px solid rgba(48,209,88,0.32); font-size:clamp(14px,1.1vw,20px); font-weight:700; color:#b8f5c8; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .medal-date { font-size:clamp(11px,0.85vw,15px); font-weight:600; color:var(--text-tertiary); white-space:nowrap; }
   .medal .medal-ico { width:clamp(20px,1.6vw,28px); height:auto; }
   @keyframes medalPop { from{opacity:0; transform:scale(0.6) translateY(8px);} to{opacity:1; transform:scale(1) translateY(0);} }
 
@@ -187,7 +189,7 @@ let month="July", actual=3853105, target=700000000;
 function formatSAR(v){ if(v>=1e9)return "SAR "+trimZero(v/1e9)+"B"; if(v>=1e6)return "SAR "+trimZero(v/1e6)+"M"; if(v>=1e3)return "SAR "+trimZero(v/1e3)+"K"; return "SAR "+v.toLocaleString("en-US"); }
 function trimZero(n){ return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,""); }
 function trimZeroPct(v){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,""); }
-function statusColors(p){ if(p>=70)return{c:"#30d158",soft:"rgba(48,209,88,0.14)",glow:"rgba(48,209,88,0.35)"}; if(p>=40)return{c:"#f5a623",soft:"rgba(245,166,35,0.14)",glow:"rgba(245,166,35,0.35)"}; return{c:"#ff453a",soft:"rgba(255,69,58,0.14)",glow:"rgba(255,69,58,0.35)"}; }
+function statusColors(p){ if(p>=70)return{c:"#30d158",soft:"rgba(48,209,88,0.14)",glow:"rgba(48,209,88,0.35)"}; if(p>=30)return{c:"#3A9AF4",soft:"rgba(58,154,244,0.14)",glow:"rgba(58,154,244,0.35)"}; return{c:"#ff453a",soft:"rgba(255,69,58,0.14)",glow:"rgba(255,69,58,0.35)"}; }
 
 function animateNumber(el, from, to, dur, fmt){
   const start=performance.now();
@@ -236,11 +238,31 @@ function render(){
 const MILESTONE_STEP=50000000; let lastMilestoneCount=-1;
 const trophySvg='<svg class="medal-ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#30d158" stroke-width="1.8" fill="rgba(48,209,88,0.18)"/><path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#30d158" stroke-width="1.8"/><path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#30d158" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 
+function loadMilestoneDates(){ try{ return JSON.parse(localStorage.getItem("kpi_milestone_dates")||"{}"); }catch(e){ return {}; } }
+function saveMilestoneDates(d){ try{ localStorage.setItem("kpi_milestone_dates", JSON.stringify(d)); }catch(e){} }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+
 function updateMilestones(a){
   const count=Math.floor(a/MILESTONE_STEP);
   const row=document.getElementById("milestones");
+
+  // record first-reached date for any newly-earned milestone
+  const dates=loadMilestoneDates();
+  let changed=false;
+  for(let i=1;i<=count;i++){
+    const key=String(i*MILESTONE_STEP);
+    if(!dates[key]){ dates[key]=Date.now(); changed=true; }
+  }
+  if(changed) saveMilestoneDates(dates);
+
   let h='<span class="milestones-head">Milestones</span>';
-  if(count>0){ for(let i=1;i<=count;i++){ h+='<span class="medal">'+trophySvg+'<span>'+fmtMilestone(i*MILESTONE_STEP)+'</span></span>'; } }
+  if(count>0){
+    for(let i=1;i<=count;i++){
+      const key=String(i*MILESTONE_STEP);
+      const dateLabel = dates[key] ? fmtDate(dates[key]) : "—";
+      h+='<span class="medal-col"><span class="medal">'+trophySvg+'<span>'+fmtMilestone(i*MILESTONE_STEP)+'</span></span><span class="medal-date">'+dateLabel+'</span></span>';
+    }
+  }
   else { h+='<span class="milestones-head" style="margin:0;opacity:0.7;">None yet</span>'; }
   row.innerHTML=h;
 
