@@ -185,6 +185,7 @@ const POLL_SECONDS = 30;
 let last24h=null, lastweek=null, thisweek=null;
 let months = { jun:null, jul:null, aug:null };
 let month="July", actual=3853105, target=700000000;
+let msDates = {};   // { "50000000": "7/14/2026", ... } from sheet columns date50, date100 ...
 
 function formatSAR(v){ if(v>=1e9)return "SAR "+trimZero(v/1e9)+"B"; if(v>=1e6)return "SAR "+trimZero(v/1e6)+"M"; if(v>=1e3)return "SAR "+trimZero(v/1e3)+"K"; return "SAR "+v.toLocaleString("en-US"); }
 function trimZero(n){ return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,""); }
@@ -238,28 +239,38 @@ function render(){
 const MILESTONE_STEP=50000000; let lastMilestoneCount=-1;
 const trophySvg='<svg class="medal-ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#30d158" stroke-width="1.8" fill="rgba(48,209,88,0.18)"/><path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#30d158" stroke-width="1.8"/><path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#30d158" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 
-function loadMilestoneDates(){ try{ return JSON.parse(localStorage.getItem("kpi_milestone_dates")||"{}"); }catch(e){ return {}; } }
-function saveMilestoneDates(d){ try{ localStorage.setItem("kpi_milestone_dates", JSON.stringify(d)); }catch(e){} }
-function fmtDate(ts){ return new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+function fmtDate(str){
+  // Goal: always display like "Aug 6".
+  // - numeric dates (7/14/2026, 2026-08-06, or a Date serial) -> "Aug 6"
+  // - text already like "July 14" / "Aug 6" -> shown as-is (trimmed)
+  if(str==null) return "";
+  const s = String(str).trim();
+  if(s==="") return "";
+
+  let d = null;
+  // M/D/YYYY or M/D/YY
+  let mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(mdy){ let y=mdy[3]; if(y.length===2)y="20"+y; d=new Date(+y, +mdy[1]-1, +mdy[2]); }
+  // YYYY-MM-DD
+  if(!d){ let iso=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(iso){ d=new Date(+iso[1], +iso[2]-1, +iso[3]); } }
+  // plain number = Google Sheets serial date (days since 1899-12-30)
+  if(!d && /^\d+(\.\d+)?$/.test(s)){ d=new Date(Date.UTC(1899,11,30)); d.setUTCDate(d.getUTCDate()+Math.floor(+s)); }
+
+  if(d && !isNaN(d)){
+    return d.toLocaleDateString("en-US",{month:"short",day:"numeric"}); // -> "Aug 6"
+  }
+  return s; // already friendly text like "July 14"
+}
 
 function updateMilestones(a){
   const count=Math.floor(a/MILESTONE_STEP);
   const row=document.getElementById("milestones");
 
-  // record first-reached date for any newly-earned milestone
-  const dates=loadMilestoneDates();
-  let changed=false;
-  for(let i=1;i<=count;i++){
-    const key=String(i*MILESTONE_STEP);
-    if(!dates[key]){ dates[key]=Date.now(); changed=true; }
-  }
-  if(changed) saveMilestoneDates(dates);
-
   let h='<span class="milestones-head">Milestones</span>';
   if(count>0){
     for(let i=1;i<=count;i++){
       const key=String(i*MILESTONE_STEP);
-      const dateLabel = dates[key] ? fmtDate(dates[key]) : "—";
+      const dateLabel = msDates[key] ? fmtDate(msDates[key]) : "—";
       h+='<span class="medal-col"><span class="medal">'+trophySvg+'<span>'+fmtMilestone(i*MILESTONE_STEP)+'</span></span><span class="medal-date">'+dateLabel+'</span></span>';
     }
   }
@@ -318,16 +329,29 @@ let lastSnapshot="";
 function setStatus(state,text){ const c=document.getElementById("sync-chip"); if(!RESOLVED_URL&&!SHEET_ID){c.style.display="none";return;} c.style.display="flex"; c.className="sync-chip "+state; document.getElementById("sync-text").textContent=text; }
 function parseCsvLine(line){ const out=[]; let cur="",inQ=false; for(const ch of line){ if(ch==='"')inQ=!inQ; else if(ch===","&&!inQ){out.push(cur);cur="";} else cur+=ch; } out.push(cur); return out.map(v=>v.trim()); }
 function cleanNumber(v){ return parseFloat(String(v).replace(/[^0-9.]/g,"")); }
+function extractDates(row){
+  // columns like date50, date100, date150 -> keyed by absolute milestone (50 -> 50000000)
+  const out={};
+  Object.keys(row).forEach(k=>{
+    const m=k.match(/^date(\d+)$/);
+    if(m && row[k]!=null && String(row[k]).trim()!==""){
+      out[String(parseInt(m[1],10)*1000000)] = row[k];
+    }
+  });
+  return out;
+}
 
 function applyValues(nMonth,nActual,nTarget,ex){
   if(isNaN(nActual)||isNaN(nTarget)||nTarget<=0){ setStatus("err","Values in row 2 are not valid numbers"); return; }
   setStatus("ok","Live · synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
   const n24=ex&&!isNaN(ex.last24h)?ex.last24h:null, nW=ex&&!isNaN(ex.lastweek)?ex.lastweek:null, nT=ex&&!isNaN(ex.thisweek)?ex.thisweek:null;
   const mJun=ex&&!isNaN(ex.jun)?ex.jun:null, mJul=ex&&!isNaN(ex.jul)?ex.jul:null, mAug=ex&&!isNaN(ex.aug)?ex.aug:null;
-  const snap=[nMonth,nActual,nTarget,n24,nW,nT,mJun,mJul,mAug].join("|");
+  const dts = (ex&&ex.dates) ? ex.dates : {};
+  const snap=[nMonth,nActual,nTarget,n24,nW,nT,mJun,mJul,mAug,JSON.stringify(dts)].join("|");
   if(snap===lastSnapshot) return; lastSnapshot=snap;
   month=nMonth||month; actual=nActual; target=nTarget;
   last24h=n24; lastweek=nW; thisweek=nT; months={jun:mJun,jul:mJul,aug:mAug};
+  msDates=dts;
   render();
 }
 
@@ -339,7 +363,7 @@ async function fetchCsv(){
   const headers=parseCsvLine(lines[0]).map(h=>h.toLowerCase()); const values=parseCsvLine(lines[1]); const row={};
   headers.forEach((h,i)=>row[h]=values[i]);
   if(!("actual" in row)||!("target" in row)){ setStatus("err","Headers must be: month, actual, target (row 1)"); return true; }
-  applyValues(row.month,cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug) });
+  applyValues(row.month,cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), dates:extractDates(row) });
   return true;
 }
 function fetchJsonp(){
@@ -352,7 +376,7 @@ function fetchJsonp(){
       const cols=data.table.cols.map(c=>(c.label||"").toLowerCase().trim()); const cells=data.table.rows[0].c; const row={};
       cols.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null);
       if(!("actual" in row)||!("target" in row)){ setStatus("err","Headers must be: month, actual, target (row 1)"); resolve(true); return; }
-      applyValues(String(row.month??""),cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug) });
+      applyValues(String(row.month??""),cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), dates:extractDates(row) });
       resolve(true);
     }catch(e){reject(e);} };
     s.onerror=()=>{cleanup();reject(new Error("script load failed"));};
