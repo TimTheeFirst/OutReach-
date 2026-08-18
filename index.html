@@ -190,7 +190,13 @@ let msDates = {};   // { "50000000": "7/14/2026", ... } from sheet columns date5
 function formatSAR(v){ if(v>=1e9)return "SAR "+trimZero(v/1e9)+"B"; if(v>=1e6)return "SAR "+trimZero(v/1e6)+"M"; if(v>=1e3)return "SAR "+trimZero(v/1e3)+"K"; return "SAR "+v.toLocaleString("en-US"); }
 function trimZero(n){ return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,""); }
 function trimZeroPct(v){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,""); }
-function statusColors(p){ if(p>=70)return{c:"#30d158",soft:"rgba(48,209,88,0.14)",glow:"rgba(48,209,88,0.35)"}; if(p>=30)return{c:"#3A9AF4",soft:"rgba(58,154,244,0.14)",glow:"rgba(58,154,244,0.35)"}; return{c:"#ff453a",soft:"rgba(255,69,58,0.14)",glow:"rgba(255,69,58,0.35)"}; }
+function statusColors(p){
+  // 0–59.99% red · 60–69.99% purple · 70–98.99% green · 99–100% gold (celebration)
+  if(p>=99) return {c:"#FFD34E", soft:"rgba(255,211,78,0.16)",  glow:"rgba(255,211,78,0.45)"};   // happy gold
+  if(p>=70) return {c:"#30d158", soft:"rgba(48,209,88,0.14)",   glow:"rgba(48,209,88,0.35)"};     // green
+  if(p>=60) return {c:"#9139FF", soft:"rgba(145,57,255,0.14)",  glow:"rgba(145,57,255,0.35)"};    // Manafa purple
+  return       {c:"#ff453a", soft:"rgba(255,69,58,0.14)",   glow:"rgba(255,69,58,0.35)"};         // red
+}
 
 function animateNumber(el, from, to, dur, fmt){
   const start=performance.now();
