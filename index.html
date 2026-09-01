@@ -160,6 +160,7 @@
       <div class="fin-row">
         <div class="stat-card month-hi"><div class="stat-label">July Finance</div><div class="stat-value" id="stat-jul">—</div></div>
         <div class="stat-card month-hi"><div class="stat-label">August Finance</div><div class="stat-value" id="stat-aug">—</div></div>
+        <div class="stat-card month-hi"><div class="stat-label">September Finance</div><div class="stat-value" id="stat-sep">—</div></div>
       </div>
       <div class="fin-row">
         <div class="stat-card"><div class="stat-label">Today Finance</div><div class="stat-value" id="stat-24h">—</div></div>
@@ -183,7 +184,7 @@ const QUARTER_END = "";
 const POLL_SECONDS = 30;
 
 let last24h=null, lastweek=null, thisweek=null;
-let months = { jun:null, jul:null, aug:null };
+let months = { jun:null, jul:null, aug:null, sep:null };
 let month="July", actual=3853105, target=700000000;
 let msDates = {};   // { "50000000": "7/14/2026", ... } from sheet columns date50, date100 ...
 
@@ -235,6 +236,7 @@ function render(){
   document.getElementById("stat-thisweek").textContent=(thisweek!=null&&!isNaN(thisweek))?formatSAR(thisweek):"—";
   document.getElementById("stat-jul").textContent    = (months.jul!=null&&!isNaN(months.jul)&&months.jul>0)?formatSAR(months.jul):"—";
   document.getElementById("stat-aug").textContent    = (months.aug!=null&&!isNaN(months.aug)&&months.aug>0)?formatSAR(months.aug):"—";
+  document.getElementById("stat-sep").textContent    = (months.sep!=null&&!isNaN(months.sep)&&months.sep>0)?formatSAR(months.sep):"—";
 
   updateMilestones(actual);
   document.title="Quarter Goal — "+trimZeroPct(pct)+"%";
@@ -351,12 +353,12 @@ function applyValues(nMonth,nActual,nTarget,ex){
   if(isNaN(nActual)||isNaN(nTarget)||nTarget<=0){ setStatus("err","Values in row 2 are not valid numbers"); return; }
   setStatus("ok","Live · synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
   const n24=ex&&!isNaN(ex.last24h)?ex.last24h:null, nW=ex&&!isNaN(ex.lastweek)?ex.lastweek:null, nT=ex&&!isNaN(ex.thisweek)?ex.thisweek:null;
-  const mJun=ex&&!isNaN(ex.jun)?ex.jun:null, mJul=ex&&!isNaN(ex.jul)?ex.jul:null, mAug=ex&&!isNaN(ex.aug)?ex.aug:null;
+  const mJun=ex&&!isNaN(ex.jun)?ex.jun:null, mJul=ex&&!isNaN(ex.jul)?ex.jul:null, mAug=ex&&!isNaN(ex.aug)?ex.aug:null, mSep=ex&&!isNaN(ex.sep)?ex.sep:null;
   const dts = (ex&&ex.dates) ? ex.dates : {};
-  const snap=[nMonth,nActual,nTarget,n24,nW,nT,mJun,mJul,mAug,JSON.stringify(dts)].join("|");
+  const snap=[nMonth,nActual,nTarget,n24,nW,nT,mJun,mJul,mAug,mSep,JSON.stringify(dts)].join("|");
   if(snap===lastSnapshot) return; lastSnapshot=snap;
   month=nMonth||month; actual=nActual; target=nTarget;
-  last24h=n24; lastweek=nW; thisweek=nT; months={jun:mJun,jul:mJul,aug:mAug};
+  last24h=n24; lastweek=nW; thisweek=nT; months={jun:mJun,jul:mJul,aug:mAug,sep:mSep};
   msDates=dts;
   render();
 }
@@ -369,7 +371,7 @@ async function fetchCsv(){
   const headers=parseCsvLine(lines[0]).map(h=>h.toLowerCase()); const values=parseCsvLine(lines[1]); const row={};
   headers.forEach((h,i)=>row[h]=values[i]);
   if(!("actual" in row)||!("target" in row)){ setStatus("err","Headers must be: month, actual, target (row 1)"); return true; }
-  applyValues(row.month,cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), dates:extractDates(row) });
+  applyValues(row.month,cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), sep:cleanNumber(row.sep), dates:extractDates(row) });
   return true;
 }
 function fetchJsonp(){
@@ -382,7 +384,7 @@ function fetchJsonp(){
       const cols=data.table.cols.map(c=>(c.label||"").toLowerCase().trim()); const cells=data.table.rows[0].c; const row={};
       cols.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null);
       if(!("actual" in row)||!("target" in row)){ setStatus("err","Headers must be: month, actual, target (row 1)"); resolve(true); return; }
-      applyValues(String(row.month??""),cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), dates:extractDates(row) });
+      applyValues(String(row.month??""),cleanNumber(row.actual),cleanNumber(row.target),{ last24h:cleanNumber(row.last24h), lastweek:cleanNumber(row.lastweek), thisweek:cleanNumber(row.thisweek), jun:cleanNumber(row.jun), jul:cleanNumber(row.jul), aug:cleanNumber(row.aug), sep:cleanNumber(row.sep), dates:extractDates(row) });
       resolve(true);
     }catch(e){reject(e);} };
     s.onerror=()=>{cleanup();reject(new Error("script load failed"));};
