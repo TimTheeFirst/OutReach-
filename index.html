@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Road to SAR 1B — Live</title>
+<title>The Road to $1B — Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -35,32 +35,30 @@
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
   .stage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 5vw;}
-  .kicker{display:flex;align-items:center;gap:10px;color:var(--status);font-weight:700;letter-spacing:0.2em;font-size:clamp(13px,1.1vw,18px);text-transform:uppercase;margin-bottom:2.4vh;transition:color 1s ease;}
+  .kicker{display:flex;align-items:center;gap:10px;color:var(--status);font-weight:700;letter-spacing:0.2em;font-size:clamp(13px,1.1vw,18px);text-transform:uppercase;margin-bottom:2.2vh;transition:color 1s ease;}
   .road{color:var(--dim);font-weight:700;letter-spacing:0.5em;font-size:clamp(15px,1.5vw,24px);text-transform:uppercase;margin-bottom:1vh;padding-left:0.5em;}
 
-  /* orbit system around the big percent */
   .orbit-wrap{position:relative;display:inline-flex;align-items:flex-start;justify-content:center;margin:1vh 0;}
   .pct-big{display:flex;align-items:flex-start;line-height:0.9;position:relative;z-index:2;}
-  .pct-big .n{font-size:clamp(84px,12vw,210px);font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--status);text-shadow:0 0 70px var(--status-glow);transition:color 1s ease, text-shadow 1s ease;}
+  .pct-big .n{font-size:clamp(80px,11vw,200px);font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--status);text-shadow:0 0 70px var(--status-glow);transition:color 1s ease, text-shadow 1s ease;}
   .pct-big .s{font-size:clamp(26px,3.2vw,56px);font-weight:900;color:var(--status);margin-top:0.3em;transition:color 1s ease;}
   .orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(255,255,255,0.06);transform:translate(-50%,-50%);z-index:1;pointer-events:none;}
-  .planet{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .planet .chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(6px);font-size:clamp(14px,1.3vw,22px);color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,0.4);}
-  .planet .chip.riyal{font-size:clamp(18px,1.7vw,30px);color:#cfd6c8;}
+  .orbiter{position:absolute;top:50%;left:50%;width:0;height:0;}
+  .planet{position:absolute;top:50%;left:50%;}
+  .planet .chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(6px);font-size:clamp(14px,1.3vw,22px);font-weight:800;color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,0.4);}
+  .planet .chip.sign{font-size:clamp(18px,1.7vw,30px);color:#cfd6c8;}
   @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
   @keyframes spinrev{from{transform:translate(-50%,-50%) rotate(360deg);}to{transform:translate(-50%,-50%) rotate(0deg);}}
-  .orbiter{position:absolute;top:50%;left:50%;width:0;height:0;}
-  .orbiter > .planet{left:auto;right:auto;}
 
   .complete{font-size:clamp(20px,2.4vw,40px);font-weight:800;letter-spacing:0.08em;margin-top:0.4vh;}
   .complete .ar{display:block;font-family:var(--font-ar);font-weight:600;font-size:0.5em;color:var(--dim);letter-spacing:0;margin-top:6px;}
-  .tagline{color:var(--dim);font-size:clamp(13px,1.2vw,20px);font-weight:500;margin-top:2.2vh;max-width:40ch;}
+  .tagline{color:var(--dim);font-size:clamp(13px,1.2vw,20px);font-weight:500;margin-top:2vh;max-width:40ch;}
 
-  .panel{margin-top:3.2vh;width:min(900px,92vw);background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:clamp(16px,2.2vh,28px) clamp(22px,2.4vw,36px);backdrop-filter:blur(10px);}
+  .panel{margin-top:3vh;width:min(900px,92vw);background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:clamp(16px,2.2vh,28px) clamp(22px,2.4vw,36px);backdrop-filter:blur(10px);}
   .panel-head{display:flex;justify-content:space-between;align-items:center;font-size:clamp(11px,0.9vw,15px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);}
   .panel-head .pct{color:var(--ink);}
   .amount-line{display:flex;align-items:center;gap:14px;justify-content:center;margin:10px 0 14px;}
-  .amount-line .cur{color:var(--status);font-weight:800;font-size:clamp(18px,1.8vw,30px);transition:color 1s ease;}
+  .amount-line .cur{color:var(--status);font-weight:800;font-size:clamp(20px,2vw,34px);transition:color 1s ease;}
   .amount-line .amt{font-size:clamp(38px,5vw,88px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
   .add-flash{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#30d158;color:#07140a;font-weight:800;font-size:clamp(12px,1vw,16px);opacity:0;transform:translateX(-10px);transition:all 0.4s ease;}
   .add-flash.show{opacity:1;transform:translateX(0);}
@@ -70,13 +68,11 @@
   .panel-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:clamp(11px,0.95vw,16px);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;}
   .panel-foot .go{color:var(--status);transition:color 1s ease;}
 
-  /* Q4 month cards */
-  .months{margin-top:2.6vh;width:min(900px,92vw);display:flex;gap:clamp(12px,1.4vw,22px);}
-  .mcard{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:clamp(14px,1.8vh,22px) clamp(16px,1.6vw,26px);}
-  .mcard.current{border-color:rgba(48,209,88,0.5);background:rgba(48,209,88,0.06);}
-  .mcard.pending{opacity:0.5;}
-  .mcard .mn{font-size:clamp(11px,0.95vw,16px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
-  .mcard .mv{font-size:clamp(22px,2.2vw,38px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
+  /* finance stat cards: Today / This Week / This Month */
+  .fins{margin-top:2.4vh;width:min(900px,92vw);display:flex;gap:clamp(12px,1.4vw,22px);}
+  .fcard{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:clamp(14px,1.8vh,22px) clamp(16px,1.6vw,26px);}
+  .fcard .fn{font-size:clamp(11px,0.95vw,16px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
+  .fcard .fv{font-size:clamp(24px,2.4vw,42px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
 
   .sync-chip{position:fixed;bottom:14px;right:18px;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);font-size:12px;font-weight:600;color:var(--faint);z-index:6;}
   .sync-chip .sd{width:7px;height:7px;border-radius:50%;background:#555;}
@@ -105,40 +101,29 @@
 </div>
 
 <div class="stage">
-  <div class="kicker">✦ The Road to SAR 1 Billion</div>
+  <div class="kicker">✦ The Road to $1 Billion</div>
   <div class="road">Q4 · Momentum Building</div>
 
   <div class="orbit-wrap" id="orbit-wrap">
     <div class="orbit" id="orbit1"></div>
     <div class="orbit" id="orbit2"></div>
     <div class="pct-big"><span class="n" id="pct-num">0.00</span><span class="s">%</span></div>
-    <!-- orbiters injected by JS -->
   </div>
 
-  <div class="complete">COMPLETE<span class="ar">نحو هدف المليار ريال</span></div>
+  <div class="complete">COMPLETE<span class="ar">نحو هدف المليار</span></div>
   <div class="tagline">Together, we are powering the businesses that move Saudi Arabia forward.</div>
 
   <div class="panel">
-    <div class="panel-head">
-      <span>Financing Unlocked</span>
-      <span class="pct" id="panel-pct">0%</span>
-    </div>
-    <div class="amount-line">
-      <span class="cur">﷼</span>
-      <span class="amt" id="amount">0</span>
-      <span class="add-flash" id="add-flash"></span>
-    </div>
+    <div class="panel-head"><span>Financing Unlocked</span><span class="pct" id="panel-pct">0%</span></div>
+    <div class="amount-line"><span class="cur">$</span><span class="amt" id="amount">0</span><span class="add-flash" id="add-flash"></span></div>
     <div class="track"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
-    <div class="panel-foot">
-      <span class="go" id="togo">— to go</span>
-      <span>Goal · ﷼ 1,000,000,000</span>
-    </div>
+    <div class="panel-foot"><span class="go" id="togo">— to go</span><span>Goal · $1,000,000,000</span></div>
   </div>
 
-  <div class="months">
-    <div class="mcard" id="mc-oct"><div class="mn">October</div><div class="mv" id="mv-oct">—</div></div>
-    <div class="mcard" id="mc-nov"><div class="mn">November</div><div class="mv" id="mv-nov">—</div></div>
-    <div class="mcard" id="mc-dec"><div class="mn">December</div><div class="mv" id="mv-dec">—</div></div>
+  <div class="fins">
+    <div class="fcard"><div class="fn">Today</div><div class="fv" id="fv-day">—</div></div>
+    <div class="fcard"><div class="fn">This Week</div><div class="fv" id="fv-week">—</div></div>
+    <div class="fcard"><div class="fn">This Month</div><div class="fv" id="fv-month">—</div></div>
   </div>
 </div>
 
@@ -148,48 +133,36 @@
 /* ================= CONFIG ================= */
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfxJp-bPlcetEh63C-5lMvUpXvWVvqbcMhOtlh1A9VwVTHIOMmhtyfzMDy6c-xFSTLWJjKQvlM2Th/pub?output=csv";
 const SHEET_ID  = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";
-const GOAL = 1000000000;         // Q4 KPI: SAR 1B
+const GOAL = 1000000000;         // Q4 KPI: $1B
+const QUARTER_END = "";          // optional e.g. "2026-12-31"
 const POLL_SECONDS = 15;
-const QUARTER_END = "";          // optional override e.g. "2026-12-31"; empty = auto calendar quarter
 /* ========================================== */
 
-let actual=0;
-let months={oct:null,nov:null,dec:null};
+let actual=0, today=null, week=null, monthFin=null;
 
-// concentric background rings
 (function(){ const r=document.getElementById("rings"); for(let i=1;i<=6;i++){ const s=document.createElement("span"); const sz=i*18; s.style.width=sz+"vmin"; s.style.height=sz+"vmin"; r.appendChild(s);} })();
 
-// ----- orbiting planets around the number -----
+// orbiting dollar/1B planets
 const ORBITERS=[
-  {label:"﷼", riyal:true, r:1.05, dur:26, dir:1,  start:0},
-  {label:"﷼", riyal:true, r:1.05, dur:26, dir:1,  start:180},
-  {label:"1B", riyal:false, r:1.35, dur:38, dir:-1, start:90},
-  {label:"﷼", riyal:true, r:1.35, dur:38, dir:-1, start:270},
+  {label:"$",  sign:true,  r:1.05, dur:26, dir:1,  start:0},
+  {label:"$",  sign:true,  r:1.05, dur:26, dir:1,  start:180},
+  {label:"1B", sign:false, r:1.35, dur:38, dir:-1, start:90},
+  {label:"$",  sign:true,  r:1.35, dur:38, dir:-1, start:270},
 ];
 function buildOrbits(){
-  const wrap=document.getElementById("orbit-wrap");
-  const box=wrap.getBoundingClientRect();
+  const wrap=document.getElementById("orbit-wrap"); const box=wrap.getBoundingClientRect();
   const base=Math.max(box.width,box.height);
-  // size the two visible guide orbits
   document.getElementById("orbit1").style.width=document.getElementById("orbit1").style.height=(base*2.1)+"px";
   document.getElementById("orbit2").style.width=document.getElementById("orbit2").style.height=(base*2.7)+"px";
-  // remove old orbiters
   wrap.querySelectorAll(".orbiter").forEach(e=>e.remove());
   ORBITERS.forEach(o=>{
-    const spinner=document.createElement("div");
-    spinner.className="orbiter";
-    spinner.style.animation=(o.dir>0?"spin":"spinrev")+" "+o.dur+"s linear infinite";
-    spinner.style.transform="translate(-50%,-50%) rotate("+o.start+"deg)";
-    const planet=document.createElement("div");
-    planet.className="planet";
-    const radius=(base*o.r);
-    planet.style.transform="translate(-50%,-50%) translateX("+radius+"px)";
-    planet.innerHTML='<span class="chip'+(o.riyal?' riyal':'')+'">'+o.label+'</span>';
-    // counter-rotate the chip so text stays upright
-    const inner=planet.querySelector(".chip");
-    inner.style.display="inline-flex";
-    spinner.appendChild(planet);
-    wrap.appendChild(spinner);
+    const sp=document.createElement("div"); sp.className="orbiter";
+    sp.style.animation=(o.dir>0?"spin":"spinrev")+" "+o.dur+"s linear infinite";
+    sp.style.transform="translate(-50%,-50%) rotate("+o.start+"deg)";
+    const pl=document.createElement("div"); pl.className="planet";
+    pl.style.transform="translate(-50%,-50%) translateX("+(base*o.r)+"px)";
+    pl.innerHTML='<span class="chip'+(o.sign?' sign':'')+'">'+o.label+'</span>';
+    sp.appendChild(pl); wrap.appendChild(sp);
   });
 }
 window.addEventListener("resize", buildOrbits);
@@ -197,15 +170,13 @@ window.addEventListener("resize", buildOrbits);
 function groupInt(n){ return Math.round(n).toLocaleString("en-US"); }
 function fmtM(v){ if(v>=1e9)return trim(v/1e9)+"B"; if(v>=1e6)return trim(v/1e6)+"M"; if(v>=1e3)return trim(v/1e3)+"K"; return String(Math.round(v)); }
 function trim(n){ return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,""); }
-function formatSAR(v){ return "﷼ "+fmtM(v); }
+function usd(v){ return "$"+fmtM(v); }
 
-/* threshold rule: red <90 · green 90–98.99 · gold 99+ */
 function statusColor(pct){
   if(pct>=99) return {c:"#FFD34E", glow:"rgba(255,211,78,0.45)", soft:"rgba(255,211,78,0.12)"};
   if(pct>=90) return {c:"#30d158", glow:"rgba(48,209,88,0.45)",  soft:"rgba(48,209,88,0.12)"};
   return          {c:"#ff453a", glow:"rgba(255,69,58,0.45)",  soft:"rgba(255,69,58,0.12)"};
 }
-
 function animateTo(el, from, to, dur, fmt){
   const start=performance.now();
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(to); return; }
@@ -215,36 +186,21 @@ function animateTo(el, from, to, dur, fmt){
 
 function render(prev){
   const pct=Math.max(0,Math.min(actual/GOAL*100,100));
-  const col=statusColor(pct);
-  const root=document.documentElement.style;
+  const col=statusColor(pct); const root=document.documentElement.style;
   root.setProperty("--status",col.c); root.setProperty("--status-glow",col.glow); root.setProperty("--status-soft",col.soft);
-
   animateTo(document.getElementById("pct-num"), (prev||0)/GOAL*100, pct, 1600, v=>v.toFixed(2));
   document.getElementById("panel-pct").textContent=pct.toFixed(2)+"%";
   animateTo(document.getElementById("amount"), prev||0, actual, 1600, v=>groupInt(v));
   requestAnimationFrame(()=>{ document.getElementById("fill").style.width=pct+"%"; document.getElementById("knob").style.left=pct+"%"; });
   const togo=Math.max(GOAL-actual,0);
   document.getElementById("togo").textContent = togo>0 ? fmtM(togo)+" to go" : "Goal reached 🎉";
-
-  // month cards (Q4)
-  const cur=new Date().getMonth(); // 9=Oct,10=Nov,11=Dec
-  const map={oct:9,nov:10,dec:11};
-  ["oct","nov","dec"].forEach(k=>{
-    const v=months[k], card=document.getElementById("mc-"+k), mv=document.getElementById("mv-"+k);
-    card.classList.remove("current","pending");
-    if(v!=null&&!isNaN(v)&&v>0){ mv.textContent=formatSAR(v); if(cur===map[k])card.classList.add("current"); }
-    else { mv.textContent="—"; card.classList.add("pending"); }
-  });
-
-  document.title="The Road to 1B — "+pct.toFixed(1)+"%";
+  document.getElementById("fv-day").textContent   = (today!=null&&!isNaN(today))?usd(today):"—";
+  document.getElementById("fv-week").textContent  = (week!=null&&!isNaN(week))?usd(week):"—";
+  document.getElementById("fv-month").textContent = (monthFin!=null&&!isNaN(monthFin))?usd(monthFin):"—";
+  document.title="The Road to $1B — "+pct.toFixed(1)+"%";
 }
 
-function flashAdd(delta){
-  if(delta<=0) return;
-  const el=document.getElementById("add-flash");
-  el.textContent="+ ﷼ "+groupInt(delta); el.classList.add("show");
-  launchConfetti(); setTimeout(()=>el.classList.remove("show"),4000);
-}
+function flashAdd(delta){ if(delta<=0) return; const el=document.getElementById("add-flash"); el.textContent="+ $"+groupInt(delta); el.classList.add("show"); launchConfetti(); setTimeout(()=>el.classList.remove("show"),4000); }
 function launchConfetti(){
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const cols=["#ff453a","#ffffff","#FFD34E","#30d158"]; const N=70;
@@ -252,27 +208,39 @@ function launchConfetti(){
     p.style.left=Math.random()*100+"vw"; p.style.background=cols[i%cols.length];
     p.style.borderRadius=Math.random()>0.5?"50%":"2px"; p.style.setProperty("--dx",(Math.random()*160-80)+"px");
     const dur=2.4+Math.random()*1.6, dl=Math.random()*0.3;
-    p.style.animation="fall "+dur+"s ease-in "+dl+"s forwards";
-    p.addEventListener("animationend",()=>p.remove());
+    p.style.animation="fall "+dur+"s ease-in "+dl+"s forwards"; p.addEventListener("animationend",()=>p.remove());
     document.body.appendChild(p); setTimeout(()=>p.remove(),(dur+dl)*1000+400);
   }
 }
 
-/* ---- sheet sync ---- */
+/* countdown */
+function quarterEndDate(now){ if(QUARTER_END){const d=new Date(QUARTER_END+"T23:59:59"); if(!isNaN(d))return d;} const q=Math.floor(now.getMonth()/3); return new Date(now.getFullYear(), q*3+3, 0, 23,59,59); }
+const pad2=n=>String(n).padStart(2,"0");
+function updateCountdown(){
+  const now=new Date(), end=quarterEndDate(now); let ms=Math.max(0,end-now);
+  const days=Math.floor(ms/86400000); ms-=days*86400000;
+  const hours=Math.floor(ms/3600000); ms-=hours*3600000;
+  const mins=Math.floor(ms/60000); ms-=mins*60000; const secs=Math.floor(ms/1000);
+  document.getElementById("cd-days").textContent=days; document.getElementById("cd-hours").textContent=pad2(hours);
+  document.getElementById("cd-mins").textContent=pad2(mins); document.getElementById("cd-secs").textContent=pad2(secs);
+  const q=Math.floor(end.getMonth()/3)+1;
+  document.getElementById("cd-qlbl").textContent="· Q"+q+" ends "+end.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+}
+
+/* sheet sync */
 function resolveUrl(u){ if(!u)return""; if(u.includes("output=csv")||u.includes("tqx=out:csv"))return u; const m=u.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/); if(m)return "https://docs.google.com/spreadsheets/d/"+m[1]+"/gviz/tq?tqx=out:csv"; return u; }
 const RURL=resolveUrl(SHEET_URL);
 function setStatus(s,t){ const c=document.getElementById("sync-chip"); c.className="sync-chip "+s; document.getElementById("sync-text").textContent=t; }
 function parseLine(l){ const o=[];let c="",q=false; for(const ch of l){ if(ch==='"')q=!q; else if(ch===","&&!q){o.push(c);c="";} else c+=ch; } o.push(c); return o.map(x=>x.trim()); }
 function num(v){ return parseFloat(String(v).replace(/[^0-9.]/g,"")); }
 
-function apply(a, mo){
+function apply(a, d, w, mo){
   if(isNaN(a)){ setStatus("err","Bad value for 'actual'"); return; }
   setStatus("ok","Live · "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
-  months=mo;
+  today=d; week=w; monthFin=mo;
   if(a===actual){ render(actual); return; }
   const prev=actual; actual=a; render(prev); flashAdd(a-prev);
 }
-
 async function fetchCsv(){
   const r=await fetch(RURL+(RURL.includes("?")?"&":"?")+"cb="+Date.now());
   if(!r.ok) throw new Error("HTTP "+r.status);
@@ -280,35 +248,17 @@ async function fetchCsv(){
   const lines=t.trim().split(/\r?\n/); if(lines.length<2){setStatus("err","No data row");return;}
   const H=parseLine(lines[0]).map(h=>h.toLowerCase()), V=parseLine(lines[1]); const row={}; H.forEach((h,i)=>row[h]=V[i]);
   if(!("actual" in row)){ setStatus("err","Need 'actual' column"); return; }
-  apply(num(row.actual), {oct:num(row.oct),nov:num(row.nov),dec:num(row.dec)});
+  apply(num(row.actual), num(row.today), num(row.week), num(row.monthfin));
 }
 function fetchJsonp(){ return new Promise((res,rej)=>{ if(!SHEET_ID){rej();return;} const cb="cb"+Date.now(),s=document.createElement("script"); const to=setTimeout(()=>{cl();rej();},10000); function cl(){clearTimeout(to);delete window[cb];s.remove();}
-  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null); if(!("actual" in row)){setStatus("err","Need 'actual' column");res();return;} apply(num(row.actual), {oct:num(row.oct),nov:num(row.nov),dec:num(row.dec)}); res(); }catch(e){rej(e);} };
+  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null); if(!("actual" in row)){setStatus("err","Need 'actual' column");res();return;} apply(num(row.actual),num(row.today),num(row.week),num(row.monthfin)); res(); }catch(e){rej(e);} };
   s.onerror=()=>{cl();rej();}; s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:"+cb+"&headers=1&cb="+Date.now(); document.head.appendChild(s); }); }
 async function sync(){ try{ await fetchCsv(); } catch(e){ try{ await fetchJsonp(); }catch(e2){ setStatus("err","Can't reach sheet — check link/sharing"); } } }
 
-function quarterEndDate(now){ if(QUARTER_END){const d=new Date(QUARTER_END+"T23:59:59"); if(!isNaN(d))return d;} const q=Math.floor(now.getMonth()/3); return new Date(now.getFullYear(), q*3+3, 0, 23,59,59); }
-const pad2=n=>String(n).padStart(2,"0");
-function updateCountdown(){
-  const now=new Date(), end=quarterEndDate(now); let ms=Math.max(0,end-now);
-  const days=Math.floor(ms/86400000); ms-=days*86400000;
-  const hours=Math.floor(ms/3600000); ms-=hours*3600000;
-  const mins=Math.floor(ms/60000); ms-=mins*60000;
-  const secs=Math.floor(ms/1000);
-  document.getElementById("cd-days").textContent=days;
-  document.getElementById("cd-hours").textContent=pad2(hours);
-  document.getElementById("cd-mins").textContent=pad2(mins);
-  document.getElementById("cd-secs").textContent=pad2(secs);
-  const q=Math.floor(end.getMonth()/3)+1;
-  document.getElementById("cd-qlbl").textContent="· Q"+q+" ends "+end.toLocaleDateString("en-US",{month:"short",day:"numeric"});
-}
-updateCountdown();
-setInterval(updateCountdown,1000);
-
+updateCountdown(); setInterval(updateCountdown,1000);
 buildOrbits();
 setStatus("","Connecting…");
-sync();
-setInterval(sync, POLL_SECONDS*1000);
+sync(); setInterval(sync, POLL_SECONDS*1000);
 </script>
 </body>
 </html>
