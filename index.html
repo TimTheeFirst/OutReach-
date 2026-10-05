@@ -123,6 +123,7 @@
   <div class="fins">
     <div class="fcard"><div class="fn">Today</div><div class="fv" id="fv-day">—</div></div>
     <div class="fcard"><div class="fn">This Week</div><div class="fv" id="fv-week">—</div></div>
+    <div class="fcard"><div class="fn">Last Week</div><div class="fv" id="fv-lastweek">—</div></div>
     <div class="fcard"><div class="fn">This Month</div><div class="fv" id="fv-month">—</div></div>
   </div>
 </div>
@@ -138,7 +139,7 @@ const QUARTER_END = "";          // optional e.g. "2026-12-31"
 const POLL_SECONDS = 15;
 /* ========================================== */
 
-let actual=0, today=null, week=null, monthFin=null;
+let actual=0, today=null, thisweek=null, lastweek=null, monthFin=null;
 
 (function(){ const r=document.getElementById("rings"); for(let i=1;i<=6;i++){ const s=document.createElement("span"); const sz=i*18; s.style.width=sz+"vmin"; s.style.height=sz+"vmin"; r.appendChild(s);} })();
 
@@ -194,9 +195,10 @@ function render(prev){
   requestAnimationFrame(()=>{ document.getElementById("fill").style.width=pct+"%"; document.getElementById("knob").style.left=pct+"%"; });
   const togo=Math.max(GOAL-actual,0);
   document.getElementById("togo").textContent = togo>0 ? fmtM(togo)+" to go" : "Goal reached 🎉";
-  document.getElementById("fv-day").textContent   = (today!=null&&!isNaN(today))?usd(today):"—";
-  document.getElementById("fv-week").textContent  = (week!=null&&!isNaN(week))?usd(week):"—";
-  document.getElementById("fv-month").textContent = (monthFin!=null&&!isNaN(monthFin))?usd(monthFin):"—";
+  document.getElementById("fv-day").textContent      = (today!=null&&!isNaN(today))?usd(today):"—";
+  document.getElementById("fv-week").textContent     = (thisweek!=null&&!isNaN(thisweek))?usd(thisweek):"—";
+  document.getElementById("fv-lastweek").textContent = (lastweek!=null&&!isNaN(lastweek))?usd(lastweek):"—";
+  document.getElementById("fv-month").textContent    = (monthFin!=null&&!isNaN(monthFin))?usd(monthFin):"—";
   document.title="The Road to $1B — "+pct.toFixed(1)+"%";
 }
 
@@ -234,10 +236,14 @@ function setStatus(s,t){ const c=document.getElementById("sync-chip"); c.classNa
 function parseLine(l){ const o=[];let c="",q=false; for(const ch of l){ if(ch==='"')q=!q; else if(ch===","&&!q){o.push(c);c="";} else c+=ch; } o.push(c); return o.map(x=>x.trim()); }
 function num(v){ return parseFloat(String(v).replace(/[^0-9.]/g,"")); }
 
-function apply(a, d, w, mo){
+function monthColName(){ const m=new Date().getMonth(); return {9:"oct",10:"nov",11:"dec",0:"jan",1:"feb",2:"mar",3:"apr",4:"may",5:"jun",6:"jul",7:"aug",8:"sep"}[m]; }
+function apply(a, row){
   if(isNaN(a)){ setStatus("err","Bad value for 'actual'"); return; }
   setStatus("ok","Live · "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
-  today=d; week=w; monthFin=mo;
+  today    = num(row["last24h"]);
+  thisweek = num(row["thisweek"]);
+  lastweek = num(row["lastweek"]);
+  monthFin = num(row[monthColName()]);   // current calendar month column (e.g. 'oct')
   if(a===actual){ render(actual); return; }
   const prev=actual; actual=a; render(prev); flashAdd(a-prev);
 }
@@ -248,10 +254,10 @@ async function fetchCsv(){
   const lines=t.trim().split(/\r?\n/); if(lines.length<2){setStatus("err","No data row");return;}
   const H=parseLine(lines[0]).map(h=>h.toLowerCase()), V=parseLine(lines[1]); const row={}; H.forEach((h,i)=>row[h]=V[i]);
   if(!("actual" in row)){ setStatus("err","Need 'actual' column"); return; }
-  apply(num(row.actual), num(row.today), num(row.week), num(row.monthfin));
+  apply(num(row.actual), row);
 }
 function fetchJsonp(){ return new Promise((res,rej)=>{ if(!SHEET_ID){rej();return;} const cb="cb"+Date.now(),s=document.createElement("script"); const to=setTimeout(()=>{cl();rej();},10000); function cl(){clearTimeout(to);delete window[cb];s.remove();}
-  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null); if(!("actual" in row)){setStatus("err","Need 'actual' column");res();return;} apply(num(row.actual),num(row.today),num(row.week),num(row.monthfin)); res(); }catch(e){rej(e);} };
+  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null); if(!("actual" in row)){setStatus("err","Need 'actual' column");res();return;} apply(num(row.actual), row); res(); }catch(e){rej(e);} };
   s.onerror=()=>{cl();rej();}; s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:"+cb+"&headers=1&cb="+Date.now(); document.head.appendChild(s); }); }
 async function sync(){ try{ await fetchCsv(); } catch(e){ try{ await fetchJsonp(); }catch(e2){ setStatus("err","Can't reach sheet — check link/sharing"); } } }
 
