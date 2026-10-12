@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Road to $1B — Live</title>
+<title>The Road to 1 Billion — Live</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0c0a; --ink:#f4f7f2; --dim:#8c948a; --faint:#555b53;
+    --bg:#0a0c0a; --ink:#f4f7f2; --dim:#8c948a; --faint:#5d645b;
     --status:#ff453a; --status-glow:rgba(255,69,58,0.45); --status-soft:rgba(255,69,58,0.12);
-    --ring:rgba(255,255,255,0.06);
+    --ring:rgba(255,255,255,0.05);
     --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     --font-ar:"Cairo",sans-serif;
   }
@@ -19,62 +19,104 @@
   html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);overflow:hidden;-webkit-font-smoothing:antialiased;}
   body::before{content:"";position:fixed;inset:0;background:
     radial-gradient(60% 50% at 85% 8%, var(--status-soft), transparent 60%),
-    radial-gradient(70% 60% at 50% 120%, rgba(255,69,58,0.05), transparent 60%),
+    radial-gradient(70% 60% at 50% 120%, rgba(255,255,255,0.03), transparent 60%),
     #0a0c0a; z-index:-3; transition:background 1s ease;}
   .rings{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:-2;pointer-events:none;}
   .rings span{position:absolute;border:1px solid var(--ring);border-radius:50%;}
 
-  .top{position:fixed;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;z-index:5;}
-  .countdown-pill{display:flex;align-items:center;gap:12px;padding:8px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);font-size:clamp(13px,1vw,18px);font-weight:600;color:var(--dim);white-space:nowrap;}
+  /* new Saudi Riyal sign (inline SVG) */
+  .sar{display:inline-block;width:0.82em;height:0.82em;vertical-align:-0.06em;}
+
+  /* top bar */
+  .top{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;z-index:5;}
+  .countdown-pill{display:flex;align-items:center;gap:12px;padding:8px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);background:rgba(10,12,10,0.6);font-size:clamp(13px,1.7vh,18px);font-weight:600;color:var(--dim);white-space:nowrap;}
   .countdown-pill .seg{display:flex;align-items:baseline;gap:3px;}
   .countdown-pill .seg b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right;}
   .countdown-pill .seg span{font-size:0.75em;color:var(--faint);}
   .countdown-pill .qlbl{color:var(--faint);font-weight:500;}
-  .live-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);font-size:12px;font-weight:700;letter-spacing:0.1em;}
+  .live-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);background:rgba(10,12,10,0.6);font-size:12px;font-weight:700;letter-spacing:0.1em;}
   .live-pill .d{width:8px;height:8px;border-radius:50%;background:#30d158;box-shadow:0 0 10px rgba(48,209,88,0.6);animation:blink 2s infinite;}
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
-  .stage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 5vw;}
-  .kicker{display:flex;align-items:center;gap:10px;color:var(--status);font-weight:700;letter-spacing:0.2em;font-size:clamp(13px,1.1vw,18px);text-transform:uppercase;margin-bottom:2.2vh;transition:color 1s ease;}
-  .road{color:var(--dim);font-weight:700;letter-spacing:0.5em;font-size:clamp(15px,1.5vw,24px);text-transform:uppercase;margin-bottom:1vh;padding-left:0.5em;}
+  /* stage */
+  .stage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 4vw 2.5vh;}
+  .kicker{display:flex;align-items:center;gap:10px;color:var(--status);font-weight:700;letter-spacing:0.2em;font-size:clamp(12px,1.6vh,18px);text-transform:uppercase;margin-bottom:1vh;transition:color 1s ease;}
+  .road{color:var(--dim);font-weight:700;letter-spacing:0.5em;font-size:clamp(13px,2vh,24px);text-transform:uppercase;padding-left:0.5em;}
 
-  .orbit-wrap{position:relative;display:inline-flex;align-items:flex-start;justify-content:center;margin:1vh 0;}
-  .pct-big{display:flex;align-items:flex-start;line-height:0.9;position:relative;z-index:2;}
-  .pct-big .n{font-size:clamp(80px,11vw,200px);font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--status);text-shadow:0 0 70px var(--status-glow);transition:color 1s ease, text-shadow 1s ease;}
-  .pct-big .s{font-size:clamp(26px,3.2vw,56px);font-weight:900;color:var(--status);margin-top:0.3em;transition:color 1s ease;}
-  .orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(255,255,255,0.06);transform:translate(-50%,-50%);z-index:1;pointer-events:none;}
-  .orbiter{position:absolute;top:50%;left:50%;width:0;height:0;}
-  .planet{position:absolute;top:50%;left:50%;}
-  .planet .chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(6px);font-size:clamp(14px,1.3vw,22px);font-weight:800;color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,0.4);}
-  .planet .chip.sign{font-size:clamp(18px,1.7vw,30px);color:#cfd6c8;}
-  @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
-  @keyframes spinrev{from{transform:translate(-50%,-50%) rotate(360deg);}to{transform:translate(-50%,-50%) rotate(0deg);}}
+  /* big number + orbiting planets */
+  .orbit-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin:0.6vh 0;}
+  .pct-big{display:flex;align-items:flex-start;line-height:0.9;position:relative;z-index:1;}
+  .pct-big .n{font-size:clamp(64px,13vh,180px);font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--status);text-shadow:0 0 70px var(--status-glow);transition:color 1s ease,text-shadow 1s ease;}
+  .pct-big .s{font-size:clamp(24px,4.4vh,56px);font-weight:900;color:var(--status);margin-top:0.3em;transition:color 1s ease;}
+  .orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1px dashed rgba(255,255,255,0.07);transform:translate(-50%,-50%);z-index:0;pointer-events:none;}
+  .orbiter{position:absolute;top:50%;left:50%;width:0;height:0;z-index:0;pointer-events:none;}
+  .planet{position:absolute;top:0;left:0;}
+  .planet .chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(6px);font-size:clamp(14px,2vh,22px);font-weight:800;color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,0.4);opacity:0.9;}
+  .planet .chip.sign{font-size:clamp(18px,2.6vh,30px);color:#d8dfd2;padding:9px;}
+  @keyframes orbit{from{transform:rotate(var(--s));}to{transform:rotate(calc(var(--s) + 360deg));}}
+  @keyframes upright{from{transform:rotate(calc(-1 * var(--s)));}to{transform:rotate(calc(-1 * var(--s) - 360deg));}}
 
-  .complete{font-size:clamp(20px,2.4vw,40px);font-weight:800;letter-spacing:0.08em;margin-top:0.4vh;}
-  .complete .ar{display:block;font-family:var(--font-ar);font-weight:600;font-size:0.5em;color:var(--dim);letter-spacing:0;margin-top:6px;}
-  .tagline{color:var(--dim);font-size:clamp(13px,1.2vw,20px);font-weight:500;margin-top:2vh;max-width:40ch;}
+  .complete{font-size:clamp(18px,3vh,38px);font-weight:800;letter-spacing:0.08em;}
+  .complete .ar{display:block;font-family:var(--font-ar);font-weight:600;font-size:0.5em;color:var(--dim);letter-spacing:0;margin-top:2px;}
 
-  .panel{margin-top:3vh;width:min(900px,92vw);background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:clamp(16px,2.2vh,28px) clamp(22px,2.4vw,36px);backdrop-filter:blur(10px);}
-  .panel-head{display:flex;justify-content:space-between;align-items:center;font-size:clamp(11px,0.9vw,15px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);}
+  .front{position:relative;z-index:2;width:min(1120px,92vw);}
+
+  /* main progress panel */
+  .panel{margin-top:2vh;background:rgba(14,17,14,0.82);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:clamp(12px,1.9vh,26px) clamp(20px,2.2vw,34px);backdrop-filter:blur(10px);}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;font-size:clamp(11px,1.3vh,15px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);}
   .panel-head .pct{color:var(--ink);}
-  .amount-line{display:flex;align-items:center;gap:14px;justify-content:center;margin:10px 0 14px;}
-  .amount-line .cur{color:var(--status);font-weight:800;font-size:clamp(20px,2vw,34px);transition:color 1s ease;}
-  .amount-line .amt{font-size:clamp(38px,5vw,88px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
-  .add-flash{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#30d158;color:#07140a;font-weight:800;font-size:clamp(12px,1vw,16px);opacity:0;transform:translateX(-10px);transition:all 0.4s ease;}
+  .amount-line{display:flex;align-items:center;gap:14px;justify-content:center;margin:0.8vh 0 1.4vh;}
+  .amount-line .cur{color:var(--status);font-size:clamp(28px,5vh,64px);display:flex;transition:color 1s ease;}
+  .amount-line .amt{font-size:clamp(34px,6.4vh,84px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
+  .add-flash{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#30d158;color:#07140a;font-weight:800;font-size:clamp(12px,1.5vh,16px);opacity:0;transform:translateX(-10px);transition:all 0.4s ease;}
   .add-flash.show{opacity:1;transform:translateX(0);}
-  .track{position:relative;height:12px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}
-  .track .fill{position:absolute;inset:0 auto 0 0;width:0%;border-radius:999px;background:linear-gradient(90deg, color-mix(in srgb, var(--status) 60%, #000 10%), var(--status));box-shadow:0 0 20px var(--status-glow);transition:width 1.6s cubic-bezier(0.22,1,0.36,1), background 1s ease, box-shadow 1s ease;}
-  .track .knob{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 16px var(--status-glow);transition:left 1.6s cubic-bezier(0.22,1,0.36,1);}
-  .panel-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:clamp(11px,0.95vw,16px);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;}
+  .track{position:relative;height:12px;border-radius:999px;background:rgba(255,255,255,0.08);}
+  .track .fill{position:absolute;inset:0 auto 0 0;width:0%;border-radius:999px;background:linear-gradient(90deg, color-mix(in srgb, var(--status) 55%, #000 10%), var(--status));box-shadow:0 0 20px var(--status-glow);transition:width 1.6s cubic-bezier(0.22,1,0.36,1),background 1s ease,box-shadow 1s ease;z-index:1;}
+  .track .tick{position:absolute;top:2px;bottom:2px;width:2px;margin-left:-1px;border-radius:2px;background:rgba(255,255,255,0.18);z-index:2;}
+  .track .tick.done{background:rgba(10,12,10,0.45);}
+  .track .knob{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 16px var(--status-glow);transition:left 1.6s cubic-bezier(0.22,1,0.36,1);z-index:3;}
+  .panel-foot{display:flex;justify-content:space-between;margin-top:1vh;font-size:clamp(11px,1.4vh,16px);font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums;}
   .panel-foot .go{color:var(--status);transition:color 1s ease;}
 
-  /* finance stat cards: Today / This Week / This Month */
-  .fins{margin-top:2.4vh;width:min(900px,92vw);display:flex;gap:clamp(12px,1.4vw,22px);}
-  .fcard{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:clamp(14px,1.8vh,22px) clamp(16px,1.6vw,26px);}
-  .fcard .fn{font-size:clamp(11px,0.95vw,16px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
-  .fcard .fv{font-size:clamp(24px,2.4vw,42px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;}
+  /* goals (50M milestones) */
+  .goals{display:flex;align-items:center;gap:clamp(10px,1vw,16px);margin-top:1.6vh;min-height:44px;}
+  .goals .ghead{font-size:clamp(11px,1.3vh,15px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+  .goals .ghead b{color:var(--ink);}
+  .badges{display:flex;align-items:flex-start;gap:clamp(8px,0.8vw,14px);}
+  .badge-col{display:flex;flex-direction:column;align-items:center;gap:4px;animation:pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:7px 13px 7px 9px;border-radius:999px;background:rgba(48,209,88,0.12);border:1px solid rgba(48,209,88,0.32);font-size:clamp(12px,1.6vh,18px);font-weight:700;color:#b8f5c8;white-space:nowrap;}
+  .badge svg.tro{width:1.1em;height:1.1em;}
+  .badge.more{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.14);color:var(--dim);padding:7px 12px;}
+  .badge-date{font-size:clamp(10px,1.2vh,13px);font-weight:600;color:var(--faint);white-space:nowrap;}
+  @keyframes pop{from{opacity:0;transform:scale(0.6);}to{opacity:1;transform:scale(1);}}
+  .next-goal{margin-left:auto;display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;border:1px dashed rgba(245,166,35,0.55);background:rgba(245,166,35,0.08);font-size:clamp(12px,1.6vh,18px);font-weight:700;color:#ffd591;white-space:nowrap;}
+  .next-goal .t{color:#fff;}
+  .next-goal .sub{color:var(--dim);font-weight:500;}
+  .next-goal svg.ring{width:28px;height:28px;flex-shrink:0;}
 
-  .sync-chip{position:fixed;bottom:14px;right:18px;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);font-size:12px;font-weight:600;color:var(--faint);z-index:6;}
+  /* cards: Q4 months + periods */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vh 1.2vw;margin-top:1.6vh;}
+  .card{background:rgba(14,17,14,0.82);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:clamp(10px,1.5vh,20px) clamp(14px,1.4vw,24px);text-align:left;transition:border-color 0.4s ease,background 0.4s ease;}
+  .card .lbl{font-size:clamp(10px,1.25vh,15px);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:0.8vh;display:flex;justify-content:space-between;}
+  .card .lbl .tag{color:#30d158;letter-spacing:0.08em;}
+  .card .v{font-size:clamp(20px,3.4vh,42px);font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1;display:flex;align-items:center;gap:0.18em;}
+  .card .v .sar{color:var(--dim);width:0.7em;height:0.7em;}
+  .card.month{background:rgba(41,58,224,0.10);border-color:rgba(130,157,255,0.28);}
+  .card.month.current{border-color:rgba(48,209,88,0.6);background:rgba(48,209,88,0.07);}
+  .card.month.pending{opacity:0.5;}
+
+  /* milestone celebration */
+  .celebrate{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4vh;background:radial-gradient(circle at center, rgba(10,12,10,0.86), rgba(10,12,10,0.97));opacity:0;pointer-events:none;transition:opacity 0.5s ease;}
+  .celebrate.show{opacity:1;}
+  .celebrate .ck{color:#FFD34E;letter-spacing:0.3em;font-weight:800;text-transform:uppercase;font-size:clamp(14px,2.2vh,26px);}
+  .celebrate .cv{display:flex;align-items:center;gap:0.12em;font-size:clamp(90px,22vh,260px);font-weight:900;color:#fff;letter-spacing:-0.03em;text-shadow:0 0 90px rgba(255,211,78,0.55);line-height:1;}
+  .celebrate .cv .sar{width:0.6em;height:0.6em;color:#FFD34E;}
+  .celebrate.show .cv{animation:boom 0.9s cubic-bezier(0.34,1.56,0.64,1) both;}
+  .celebrate .ca{font-family:var(--font-ar);font-weight:700;font-size:clamp(20px,3.4vh,40px);color:#e4e9df;}
+  .celebrate .cn{color:var(--dim);font-size:clamp(13px,1.8vh,20px);font-weight:600;}
+  @keyframes boom{from{opacity:0;transform:scale(0.5);}to{opacity:1;transform:scale(1);}}
+
+  .sync-chip{position:fixed;bottom:12px;right:16px;display:flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:rgba(10,12,10,0.7);border:1px solid rgba(255,255,255,0.12);font-size:12px;font-weight:600;color:var(--faint);z-index:6;}
   .sync-chip .sd{width:7px;height:7px;border-radius:50%;background:#555;}
   .sync-chip.ok .sd{background:#30d158;box-shadow:0 0 8px rgba(48,209,88,0.6);}
   .sync-chip.err .sd{background:#ff5a4d;}
@@ -82,10 +124,22 @@
 
   .confetti{position:fixed;top:-20px;width:11px;height:15px;z-index:40;opacity:0;}
   @keyframes fall{0%{opacity:1;transform:translate(0,-20px) rotate(0);}100%{opacity:0;transform:translate(var(--dx,0),105vh) rotate(680deg);}}
-  @media (prefers-reduced-motion: reduce){.orbiter{animation:none!important;}}
+  @media (prefers-reduced-motion: reduce){.orbiter,.planet .chip{animation:none!important;}}
 </style>
 </head>
 <body>
+
+<!-- New Saudi Riyal sign -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sar-sign" viewBox="0 0 100 100">
+    <g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M40 10 V58 Q40 80 18 86"/>
+      <path d="M62 4 V70"/>
+      <path d="M12 50 L90 34"/>
+      <path d="M12 70 L90 54"/>
+    </g>
+  </symbol>
+</svg>
 
 <div class="rings" id="rings"></div>
 
@@ -101,31 +155,57 @@
 </div>
 
 <div class="stage">
-  <div class="kicker">✦ The Road to $1 Billion</div>
+  <div class="kicker">✦ The Road to <svg class="sar"><use href="#sar-sign"/></svg> 1 Billion</div>
   <div class="road">Q4 · Momentum Building</div>
 
   <div class="orbit-wrap" id="orbit-wrap">
     <div class="orbit" id="orbit1"></div>
     <div class="orbit" id="orbit2"></div>
-    <div class="pct-big"><span class="n" id="pct-num">0.00</span><span class="s">%</span></div>
+    <div class="pct-big" id="pct-big"><span class="n" id="pct-num">0.00</span><span class="s">%</span></div>
   </div>
 
   <div class="complete">COMPLETE<span class="ar">نحو هدف المليار</span></div>
-  <div class="tagline">Together, we are powering the businesses that move Saudi Arabia forward.</div>
 
-  <div class="panel">
-    <div class="panel-head"><span>Financing Unlocked</span><span class="pct" id="panel-pct">0%</span></div>
-    <div class="amount-line"><span class="cur">$</span><span class="amt" id="amount">0</span><span class="add-flash" id="add-flash"></span></div>
-    <div class="track"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
-    <div class="panel-foot"><span class="go" id="togo">— to go</span><span>Goal · $1,000,000,000</span></div>
-  </div>
+  <div class="front">
+    <div class="panel">
+      <div class="panel-head"><span>Financing Unlocked</span><span class="pct" id="panel-pct">0%</span></div>
+      <div class="amount-line">
+        <span class="cur"><svg class="sar"><use href="#sar-sign"/></svg></span>
+        <span class="amt" id="amount">0</span>
+        <span class="add-flash" id="add-flash"></span>
+      </div>
+      <div class="track" id="track"><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
+      <div class="panel-foot"><span class="go" id="togo">— to go</span><span id="goal-label">Goal</span></div>
+    </div>
 
-  <div class="fins">
-    <div class="fcard"><div class="fn">Today</div><div class="fv" id="fv-day">—</div></div>
-    <div class="fcard"><div class="fn">This Week</div><div class="fv" id="fv-week">—</div></div>
-    <div class="fcard"><div class="fn">Last Week</div><div class="fv" id="fv-lastweek">—</div></div>
-    <div class="fcard"><div class="fn">This Month</div><div class="fv" id="fv-month">—</div></div>
+    <div class="goals">
+      <span class="ghead">Goals <b id="goal-count">0 / 20</b></span>
+      <div class="badges" id="badges"></div>
+      <div class="next-goal" id="next-goal">
+        <svg class="ring" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(245,166,35,0.25)" stroke-width="4"/>
+          <circle id="ring-fill" cx="18" cy="18" r="15" fill="none" stroke="#f5a623" stroke-width="4" stroke-linecap="round" stroke-dasharray="94.25" stroke-dashoffset="94.25" transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 1s ease;"/>
+        </svg>
+        <span>Next goal: <span class="t" id="next-t">—</span> <span class="sub" id="next-sub"></span></span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card month" id="mc-oct"><div class="lbl"><span>October</span><span class="tag" id="tag-oct"></span></div><div class="v" id="v-oct">—</div></div>
+      <div class="card month" id="mc-nov"><div class="lbl"><span>November</span><span class="tag" id="tag-nov"></span></div><div class="v" id="v-nov">—</div></div>
+      <div class="card month" id="mc-dec"><div class="lbl"><span>December</span><span class="tag" id="tag-dec"></span></div><div class="v" id="v-dec">—</div></div>
+      <div class="card"><div class="lbl"><span>Today</span></div><div class="v" id="v-today">—</div></div>
+      <div class="card"><div class="lbl"><span>This Week</span></div><div class="v" id="v-thisweek">—</div></div>
+      <div class="card"><div class="lbl"><span>Last Week</span></div><div class="v" id="v-lastweek">—</div></div>
+    </div>
   </div>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="ck">✦ Goal Reached ✦</div>
+  <div class="cv"><svg class="sar"><use href="#sar-sign"/></svg><span id="cel-val">50M</span></div>
+  <div class="ca">تم تحقيق هدف جديد 🎉</div>
+  <div class="cn" id="cel-next"></div>
 </div>
 
 <div class="sync-chip" id="sync-chip"><span class="sd"></span><span id="sync-text">Connecting…</span></div>
@@ -134,44 +214,23 @@
 /* ================= CONFIG ================= */
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfxJp-bPlcetEh63C-5lMvUpXvWVvqbcMhOtlh1A9VwVTHIOMmhtyfzMDy6c-xFSTLWJjKQvlM2Th/pub?output=csv";
 const SHEET_ID  = "1avRDZt7ez6fd5QCakTy-N_ivWlx0AyFtIkQTvh6r0vA";
-const GOAL = 1000000000;         // Q4 KPI: $1B
-const QUARTER_END = "";          // optional e.g. "2026-12-31"
+const DEFAULT_GOAL = 1000000000;   // used if the sheet's 'target' cell is empty
+const STEP = 50000000;             // a goal / celebration every 50M
+const QUARTER_END = "";            // optional e.g. "2026-12-31"
 const POLL_SECONDS = 15;
 /* ========================================== */
 
-let actual=0, today=null, thisweek=null, lastweek=null, monthFin=null;
+const SAR = '<svg class="sar" aria-label="SAR"><use href="#sar-sign"/></svg>';
+let actual=null, goal=DEFAULT_GOAL, msDates={}, lastCount=-1, celTimer=null;
+let vals={oct:null,nov:null,dec:null,today:null,thisweek:null,lastweek:null};
 
-(function(){ const r=document.getElementById("rings"); for(let i=1;i<=6;i++){ const s=document.createElement("span"); const sz=i*18; s.style.width=sz+"vmin"; s.style.height=sz+"vmin"; r.appendChild(s);} })();
-
-// orbiting dollar/1B planets
-const ORBITERS=[
-  {label:"$",  sign:true,  r:1.05, dur:26, dir:1,  start:0},
-  {label:"$",  sign:true,  r:1.05, dur:26, dir:1,  start:180},
-  {label:"1B", sign:false, r:1.35, dur:38, dir:-1, start:90},
-  {label:"$",  sign:true,  r:1.35, dur:38, dir:-1, start:270},
-];
-function buildOrbits(){
-  const wrap=document.getElementById("orbit-wrap"); const box=wrap.getBoundingClientRect();
-  const base=Math.max(box.width,box.height);
-  document.getElementById("orbit1").style.width=document.getElementById("orbit1").style.height=(base*2.1)+"px";
-  document.getElementById("orbit2").style.width=document.getElementById("orbit2").style.height=(base*2.7)+"px";
-  wrap.querySelectorAll(".orbiter").forEach(e=>e.remove());
-  ORBITERS.forEach(o=>{
-    const sp=document.createElement("div"); sp.className="orbiter";
-    sp.style.animation=(o.dir>0?"spin":"spinrev")+" "+o.dur+"s linear infinite";
-    sp.style.transform="translate(-50%,-50%) rotate("+o.start+"deg)";
-    const pl=document.createElement("div"); pl.className="planet";
-    pl.style.transform="translate(-50%,-50%) translateX("+(base*o.r)+"px)";
-    pl.innerHTML='<span class="chip'+(o.sign?' sign':'')+'">'+o.label+'</span>';
-    sp.appendChild(pl); wrap.appendChild(sp);
-  });
-}
-window.addEventListener("resize", buildOrbits);
-
-function groupInt(n){ return Math.round(n).toLocaleString("en-US"); }
-function fmtM(v){ if(v>=1e9)return trim(v/1e9)+"B"; if(v>=1e6)return trim(v/1e6)+"M"; if(v>=1e3)return trim(v/1e3)+"K"; return String(Math.round(v)); }
+/* ---------- helpers ---------- */
 function trim(n){ return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,""); }
-function usd(v){ return "$"+fmtM(v); }
+function fmtM(v){ if(v>=1e9)return trim(v/1e9)+"B"; if(v>=1e6)return trim(v/1e6)+"M"; if(v>=1e3)return trim(v/1e3)+"K"; return String(Math.round(v)); }
+function goalLbl(v){ return v>=1e9 ? (v/1e9)+"B" : (v/1e6)+"M"; }
+function groupInt(n){ return Math.round(n).toLocaleString("en-US"); }
+function num(v){ if(v==null) return NaN; const s=String(v).replace(/[^0-9.]/g,""); return s===""?NaN:parseFloat(s); }
+function money(v){ return SAR+'<span>'+fmtM(v)+'</span>'; }
 
 function statusColor(pct){
   if(pct>=99) return {c:"#FFD34E", glow:"rgba(255,211,78,0.45)", soft:"rgba(255,211,78,0.12)"};
@@ -184,38 +243,156 @@ function animateTo(el, from, to, dur, fmt){
   function f(now){ const t=Math.min((now-start)/dur,1); const e=1-Math.pow(1-t,4); el.textContent=fmt(from+(to-from)*e); if(t<1)requestAnimationFrame(f); }
   requestAnimationFrame(f);
 }
+function fmtDate(str){
+  if(str==null) return "";
+  const s=String(str).trim(); if(s==="") return "";
+  let d=null;
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(m){ let y=m[3]; if(y.length===2)y="20"+y; d=new Date(+y,+m[1]-1,+m[2]); }
+  if(!d){ m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(m) d=new Date(+m[1],+m[2]-1,+m[3]); }
+  if(!d){ m=s.match(/^Date\((\d+),(\d+),(\d+)/); if(m) d=new Date(+m[1],+m[2],+m[3]); }
+  if(!d && /^\d+(\.\d+)?$/.test(s)){ d=new Date(Date.UTC(1899,11,30)); d.setUTCDate(d.getUTCDate()+Math.floor(+s)); }
+  if(d && !isNaN(d)) return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  return s;
+}
 
+/* ---------- background rings ---------- */
+(function(){ const r=document.getElementById("rings"); for(let i=1;i<=6;i++){ const s=document.createElement("span"); const sz=i*18; s.style.width=sz+"vmin"; s.style.height=sz+"vmin"; r.appendChild(s);} })();
+
+/* ---------- orbiting planets (riyal signs + 1B) ---------- */
+const ORBITERS=[
+  {html:SAR,  cls:"sign", ring:0, dur:28, rev:false, s:20},
+  {html:SAR,  cls:"sign", ring:0, dur:28, rev:false, s:200},
+  {html:"1B", cls:"",     ring:1, dur:42, rev:true,  s:110},
+  {html:SAR,  cls:"sign", ring:1, dur:42, rev:true,  s:290},
+];
+function buildOrbits(){
+  const wrap=document.getElementById("orbit-wrap");
+  const w=document.getElementById("pct-big").getBoundingClientRect().width;
+  const radii=[w*0.64, w*0.86];
+  ["orbit1","orbit2"].forEach((id,i)=>{ const el=document.getElementById(id); el.style.width=el.style.height=(radii[i]*2)+"px"; });
+  wrap.querySelectorAll(".orbiter").forEach(e=>e.remove());
+  ORBITERS.forEach(o=>{
+    const sp=document.createElement("div"); sp.className="orbiter";
+    sp.style.setProperty("--s", o.s+"deg");
+    sp.style.animation="orbit "+o.dur+"s linear infinite"+(o.rev?" reverse":"");
+    const pl=document.createElement("div"); pl.className="planet";
+    pl.style.transform="translate("+radii[o.ring]+"px,0) translate(-50%,-50%)";
+    const chip=document.createElement("span"); chip.className="chip "+o.cls; chip.innerHTML=o.html;
+    chip.style.animation="upright "+o.dur+"s linear infinite"+(o.rev?" reverse":"");
+    pl.appendChild(chip); sp.appendChild(pl); wrap.appendChild(sp);
+  });
+}
+window.addEventListener("resize", ()=>{ buildOrbits(); });
+
+/* ---------- 50M ticks on the bar ---------- */
+function buildTicks(){
+  const track=document.getElementById("track");
+  track.querySelectorAll(".tick").forEach(t=>t.remove());
+  const n=Math.floor(goal/STEP);
+  for(let i=1;i<n;i++){
+    const t=document.createElement("div"); t.className="tick"; t.dataset.v=i*STEP;
+    t.style.left=(i*STEP/goal*100)+"%"; track.appendChild(t);
+  }
+}
+
+/* ---------- render ---------- */
 function render(prev){
-  const pct=Math.max(0,Math.min(actual/GOAL*100,100));
+  const pct=Math.max(0,Math.min(actual/goal*100,100));
   const col=statusColor(pct); const root=document.documentElement.style;
   root.setProperty("--status",col.c); root.setProperty("--status-glow",col.glow); root.setProperty("--status-soft",col.soft);
-  animateTo(document.getElementById("pct-num"), (prev||0)/GOAL*100, pct, 1600, v=>v.toFixed(2));
+
+  animateTo(document.getElementById("pct-num"), Math.min((prev||0)/goal*100,100), pct, 1600, v=>v.toFixed(2));
   document.getElementById("panel-pct").textContent=pct.toFixed(2)+"%";
   animateTo(document.getElementById("amount"), prev||0, actual, 1600, v=>groupInt(v));
   requestAnimationFrame(()=>{ document.getElementById("fill").style.width=pct+"%"; document.getElementById("knob").style.left=pct+"%"; });
-  const togo=Math.max(GOAL-actual,0);
-  document.getElementById("togo").textContent = togo>0 ? fmtM(togo)+" to go" : "Goal reached 🎉";
-  document.getElementById("fv-day").textContent      = (today!=null&&!isNaN(today))?usd(today):"—";
-  document.getElementById("fv-week").textContent     = (thisweek!=null&&!isNaN(thisweek))?usd(thisweek):"—";
-  document.getElementById("fv-lastweek").textContent = (lastweek!=null&&!isNaN(lastweek))?usd(lastweek):"—";
-  document.getElementById("fv-month").textContent    = (monthFin!=null&&!isNaN(monthFin))?usd(monthFin):"—";
-  document.title="The Road to $1B — "+pct.toFixed(1)+"%";
+  document.querySelectorAll("#track .tick").forEach(t=>t.classList.toggle("done", actual>=+t.dataset.v));
+
+  const togo=Math.max(goal-actual,0);
+  document.getElementById("togo").innerHTML = togo>0 ? SAR+" "+fmtM(togo)+" to go" : "Goal reached 🎉";
+  document.getElementById("goal-label").innerHTML = "Goal · "+SAR+" "+groupInt(goal);
+
+  // Q4 month cards
+  const cur=new Date().getMonth(); const map={oct:9,nov:10,dec:11};
+  ["oct","nov","dec"].forEach(k=>{
+    const v=vals[k], card=document.getElementById("mc-"+k), el=document.getElementById("v-"+k), tag=document.getElementById("tag-"+k);
+    card.classList.remove("current","pending"); tag.textContent="";
+    if(!isNaN(v) && v>0){ el.innerHTML=money(v); if(cur===map[k]){ card.classList.add("current"); tag.textContent="● Now"; } }
+    else { el.textContent="—"; card.classList.add("pending"); }
+  });
+  // period cards
+  [["today","v-today"],["thisweek","v-thisweek"],["lastweek","v-lastweek"]].forEach(([k,id])=>{
+    const v=vals[k]; document.getElementById(id).innerHTML = (!isNaN(v)) ? money(v) : "—";
+  });
+
+  updateGoals();
+  document.title="The Road to 1B — "+pct.toFixed(1)+"%";
 }
 
-function flashAdd(delta){ if(delta<=0) return; const el=document.getElementById("add-flash"); el.textContent="+ $"+groupInt(delta); el.classList.add("show"); launchConfetti(); setTimeout(()=>el.classList.remove("show"),4000); }
-function launchConfetti(){
+/* ---------- goals: every 50M ---------- */
+const TROPHY='<svg class="tro" viewBox="0 0 24 24" fill="none"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z" stroke="#30d158" stroke-width="1.8" fill="rgba(48,209,88,0.18)"/><path d="M6 5H3.5v1.5A3 3 0 0 0 6 9.4M18 5h2.5v1.5A3 3 0 0 1 18 9.4" stroke="#30d158" stroke-width="1.8"/><path d="M12 13v3m-3 4h6m-5 0 .6-4h2.8l.6 4" stroke="#30d158" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+function updateGoals(){
+  const total=Math.floor(goal/STEP);
+  const count=Math.min(Math.floor(actual/STEP), total);
+  document.getElementById("goal-count").textContent=count+" / "+total;
+
+  // achieved badges (latest 5, with dates from sheet columns date50, date100 ...)
+  const box=document.getElementById("badges");
+  let h="";
+  const from=Math.max(1,count-4);
+  if(from>1) h+='<div class="badge-col"><span class="badge more">+'+(from-1)+'</span><span class="badge-date">&nbsp;</span></div>';
+  for(let i=from;i<=count;i++){
+    const v=i*STEP, dt=fmtDate(msDates[v]);
+    h+='<div class="badge-col"><span class="badge">'+TROPHY+goalLbl(v)+'</span><span class="badge-date">'+(dt||"&nbsp;")+'</span></div>';
+  }
+  box.innerHTML=h;
+
+  // next goal
+  const ng=document.getElementById("next-goal");
+  if(count<total){
+    const next=(count+1)*STEP, prevM=count*STEP;
+    const prog=Math.max(0,Math.min((actual-prevM)/STEP,1));
+    document.getElementById("next-t").innerHTML=SAR+" "+goalLbl(next);
+    document.getElementById("next-sub").innerHTML="· "+SAR+" "+fmtM(next-actual)+" to go";
+    document.getElementById("ring-fill").setAttribute("stroke-dashoffset",(94.25*(1-prog)).toFixed(1));
+    ng.style.display="inline-flex";
+  } else {
+    document.getElementById("next-t").textContent="All goals reached";
+    document.getElementById("next-sub").textContent="";
+    document.getElementById("ring-fill").setAttribute("stroke-dashoffset","0");
+  }
+
+  // celebrate when a NEW 50M is crossed (not on first load)
+  if(lastCount>=0 && count>lastCount) celebrate(count*STEP, count<total ? (count+1)*STEP : null);
+  lastCount=count;
+}
+
+function celebrate(reached, next){
+  document.getElementById("cel-val").textContent=goalLbl(reached);
+  document.getElementById("cel-next").innerHTML = next ? "Next goal: "+SAR+" "+goalLbl(next) : "Every goal reached!";
+  const el=document.getElementById("celebrate");
+  el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+  launchConfetti(140);
+  clearTimeout(celTimer); celTimer=setTimeout(()=>el.classList.remove("show"), 7000);
+}
+function launchConfetti(N){
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const cols=["#ff453a","#ffffff","#FFD34E","#30d158"]; const N=70;
+  const cols=["#FFD34E","#ffffff","#30d158","#ff453a","#9139FF","#3A9AF4"];
   for(let i=0;i<N;i++){ const p=document.createElement("div"); p.className="confetti";
     p.style.left=Math.random()*100+"vw"; p.style.background=cols[i%cols.length];
-    p.style.borderRadius=Math.random()>0.5?"50%":"2px"; p.style.setProperty("--dx",(Math.random()*160-80)+"px");
-    const dur=2.4+Math.random()*1.6, dl=Math.random()*0.3;
+    p.style.borderRadius=Math.random()>0.5?"50%":"2px"; p.style.setProperty("--dx",(Math.random()*200-100)+"px");
+    const dur=2.6+Math.random()*2, dl=Math.random()*0.6;
     p.style.animation="fall "+dur+"s ease-in "+dl+"s forwards"; p.addEventListener("animationend",()=>p.remove());
     document.body.appendChild(p); setTimeout(()=>p.remove(),(dur+dl)*1000+400);
   }
 }
+function flashAdd(delta){
+  if(delta<=0) return;
+  const el=document.getElementById("add-flash");
+  el.innerHTML="+ "+SAR+" "+groupInt(delta); el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),4000);
+}
 
-/* countdown */
+/* ---------- countdown ---------- */
 function quarterEndDate(now){ if(QUARTER_END){const d=new Date(QUARTER_END+"T23:59:59"); if(!isNaN(d))return d;} const q=Math.floor(now.getMonth()/3); return new Date(now.getFullYear(), q*3+3, 0, 23,59,59); }
 const pad2=n=>String(n).padStart(2,"0");
 function updateCountdown(){
@@ -229,40 +406,47 @@ function updateCountdown(){
   document.getElementById("cd-qlbl").textContent="· Q"+q+" ends "+end.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 }
 
-/* sheet sync */
+/* ---------- sheet sync ---------- */
 function resolveUrl(u){ if(!u)return""; if(u.includes("output=csv")||u.includes("tqx=out:csv"))return u; const m=u.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/); if(m)return "https://docs.google.com/spreadsheets/d/"+m[1]+"/gviz/tq?tqx=out:csv"; return u; }
 const RURL=resolveUrl(SHEET_URL);
 function setStatus(s,t){ const c=document.getElementById("sync-chip"); c.className="sync-chip "+s; document.getElementById("sync-text").textContent=t; }
 function parseLine(l){ const o=[];let c="",q=false; for(const ch of l){ if(ch==='"')q=!q; else if(ch===","&&!q){o.push(c);c="";} else c+=ch; } o.push(c); return o.map(x=>x.trim()); }
-function num(v){ return parseFloat(String(v).replace(/[^0-9.]/g,"")); }
+function extractDates(row){ const out={}; Object.keys(row).forEach(k=>{ const m=k.match(/^date(\d+)$/); if(m && row[k]!=null && String(row[k]).trim()!=="") out[parseInt(m[1],10)*1000000]=row[k]; }); return out; }
 
-function monthColName(){ const m=new Date().getMonth(); return {9:"oct",10:"nov",11:"dec",0:"jan",1:"feb",2:"mar",3:"apr",4:"may",5:"jun",6:"jul",7:"aug",8:"sep"}[m]; }
-function apply(a, row){
-  if(isNaN(a)){ setStatus("err","Bad value for 'actual'"); return; }
+let lastSnap="";
+function apply(row){
+  const a=num(row.actual);
+  if(isNaN(a)){ setStatus("err","Can't read the 'actual' cell"); return; }
   setStatus("ok","Live · "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
-  today    = num(row["last24h"]);
-  thisweek = num(row["thisweek"]);
-  lastweek = num(row["lastweek"]);
-  monthFin = num(row[monthColName()]);   // current calendar month column (e.g. 'oct')
-  if(a===actual){ render(actual); return; }
-  const prev=actual; actual=a; render(prev); flashAdd(a-prev);
+  const t=num(row.target);
+  const newGoal=(!isNaN(t)&&t>0)?t:DEFAULT_GOAL;
+  const newVals={oct:num(row.oct),nov:num(row.nov),dec:num(row.dec),today:num(row.last24h),thisweek:num(row.thisweek),lastweek:num(row.lastweek)};
+  const newDates=extractDates(row);
+  const snap=JSON.stringify([a,newGoal,newVals,newDates]);
+  if(snap===lastSnap) return; lastSnap=snap;
+  if(newGoal!==goal || !document.querySelector("#track .tick")){ goal=newGoal; buildTicks(); }
+  vals=newVals; msDates=newDates;
+  const prev=actual; actual=a;
+  render(prev);
+  if(prev!=null && a>prev) flashAdd(a-prev);
 }
 async function fetchCsv(){
   const r=await fetch(RURL+(RURL.includes("?")?"&":"?")+"cb="+Date.now());
   if(!r.ok) throw new Error("HTTP "+r.status);
   const t=await r.text(); if(t.trim().startsWith("<")) throw new Error("not csv");
-  const lines=t.trim().split(/\r?\n/); if(lines.length<2){setStatus("err","No data row");return;}
-  const H=parseLine(lines[0]).map(h=>h.toLowerCase()), V=parseLine(lines[1]); const row={}; H.forEach((h,i)=>row[h]=V[i]);
-  if(!("actual" in row)){ setStatus("err","Need 'actual' column"); return; }
-  apply(num(row.actual), row);
+  const lines=t.trim().split(/\r?\n/); if(lines.length<2){ setStatus("err","No data in row 2"); return; }
+  const H=parseLine(lines[0]).map(h=>h.toLowerCase()), V=parseLine(lines[1]); const row={}; H.forEach((h,i)=>{ if(h) row[h]=V[i]; });
+  apply(row);
 }
 function fetchJsonp(){ return new Promise((res,rej)=>{ if(!SHEET_ID){rej();return;} const cb="cb"+Date.now(),s=document.createElement("script"); const to=setTimeout(()=>{cl();rej();},10000); function cl(){clearTimeout(to);delete window[cb];s.remove();}
-  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>row[h]=cells[i]?cells[i].v:null); if(!("actual" in row)){setStatus("err","Need 'actual' column");res();return;} apply(num(row.actual), row); res(); }catch(e){rej(e);} };
+  window[cb]=d=>{cl();try{ const C=d.table.cols.map(c=>(c.label||"").toLowerCase().trim()),cells=d.table.rows[0].c,row={}; C.forEach((h,i)=>{ if(h) row[h]=cells[i]?(cells[i].f!=null?cells[i].f:cells[i].v):null; }); apply(row); res(); }catch(e){rej(e);} };
   s.onerror=()=>{cl();rej();}; s.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:json;responseHandler:"+cb+"&headers=1&cb="+Date.now(); document.head.appendChild(s); }); }
-async function sync(){ try{ await fetchCsv(); } catch(e){ try{ await fetchJsonp(); }catch(e2){ setStatus("err","Can't reach sheet — check link/sharing"); } } }
+async function sync(){ try{ await fetchCsv(); } catch(e){ try{ await fetchJsonp(); }catch(e2){ setStatus("err","Can't reach the sheet — check link/sharing"); } } }
 
+/* ---------- start ---------- */
 updateCountdown(); setInterval(updateCountdown,1000);
-buildOrbits();
+buildTicks();
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(buildOrbits); } else { buildOrbits(); }
 setStatus("","Connecting…");
 sync(); setInterval(sync, POLL_SECONDS*1000);
 </script>
